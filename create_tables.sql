@@ -284,67 +284,138 @@ CREATE TABLE erp_system.dbo.models_summary_points	(	product_id INT,
 													);		
 
 
-CREATE TABLE erp_system.dbo.model_specs	(	date_added datetime default getdate(),
-											
-											added_by INT references employees_info(employee_id),
-											category_id INT references products_category(id),
-											product_id INT,
-											brand_id INT,
-											model_id INT,
-											spec_id INT,
-											
-											spec_name varchar(150),
-											
-											genset_rated_power decimal(18, 0),
-											genset_rating_unit INT references erp_system.dbo.measure_units (id),
-											genset_ltb_50 decimal(18, 0),
-											genset_ltb_50_unit INT references erp_system.dbo.measure_units (id),
-											genset_ltb_60 decimal(18, 0),
-											genset_ltb_60_unit INT references erp_system.dbo.measure_units (id),
-											genset_prp_50 decimal(18, 0),
-											genset_prp_50_unit INT references erp_system.dbo.measure_units (id),
-											genset_prp_60 decimal(18, 0),
-											genset_prp_60_unit INT references erp_system.dbo.measure_units (id),
-											genset_cooling VARCHAR(250),
-											genset_tank VARCHAR(250),
-											genset_load VARCHAR(250),
-											genset_alternator VARCHAR(250),
-											
-											ups_io_phase VARCHAR(50),
-											ups_rated_power decimal(18, 0),
-											ups_rating INT references erp_system.dbo.measure_units (id),
-											ups_backup_time_50 INT,
-											ups_backup_time_70 INT,
-											ups_backup_time_100 INT,
-											ups_input_power_factor VARCHAR(250),
-											ups_thdi VARCHAR(250),
-											ups_input_nominal_voltage VARCHAR(250),
-											ups_input_voltage VARCHAR(250),
-											ups_voltage_tolerance VARCHAR(250),
-											ups_output_power_factor VARCHAR(250),
-											ups_thdv VARCHAR(250),
-											ups_output_nominal_voltage VARCHAR(250),
-											ups_output_dc_voltage_range VARCHAR(250),
-											ups_overload_capability VARCHAR(250),
-											ups_efficiency VARCHAR(50),
-											ups_input_connection_type VARCHAR(250),
-											ups_front_panel VARCHAR(250),
-											ups_max_power VARCHAR(250),
-											ups_certificates VARCHAR(250),
-											ups_safety VARCHAR(250),
-											ups_emc VARCHAR(405),
-											ups_environmental_aspects VARCHAR(250),
-											ups_test_performance VARCHAR(250),
-											ups_protection_degree VARCHAR(250),
-											ups_transfer_voltage_limit VARCHAR(250),
-											ups_marking VARCHAR(50),
-											
-											is_valid bit,
-											valid_until datetime,
-											
-											FOREIGN KEY(product_id, brand_id, model_id) REFERENCES erp_system.dbo.brands_models (product_id, brand_id, model_id),
-											PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
-									);
+CREATE TABLE erp_system.dbo.ups_specs	( category_id INT,
+								product_id INT,
+								brand_id INT,
+								model_id INT,
+								spec_id INT,
+								io_phase VARCHAR(50),
+								rated_power decimal(18, 0),
+								rating INT references erp_system.dbo.measure_units (id),
+								backup_time_50 INT,
+								backup_time_70 INT,
+								backup_time_100 INT,
+								input_power_factor VARCHAR(250),
+								thdi VARCHAR(250),
+								input_nominal_voltage VARCHAR(250),
+								input_voltage VARCHAR(250),
+								voltage_tolerance VARCHAR(250),
+								output_power_factor VARCHAR(250),
+								thdv VARCHAR(250),
+								output_nominal_voltage VARCHAR(250),
+								output_dc_voltage_range VARCHAR(250),
+								overload_capability VARCHAR(250),
+								efficiency VARCHAR(50),
+								input_connection_type VARCHAR(250),
+								front_panel VARCHAR(250),
+								max_power VARCHAR(250),
+								certificates VARCHAR(250),
+								safety VARCHAR(250),
+								emc VARCHAR(250),
+								environmental_aspects VARCHAR(250),
+								test_performance VARCHAR(250),
+								protection_degree VARCHAR(250),
+								transfer_voltage_limit VARCHAR(250),
+								marking VARCHAR(50),
+								is_valid bit,
+								valid_until datetime,
+								date_added datetime default getdate(),
+								
+								FOREIGN KEY(product_id, brand_id, model_id) REFERENCES erp_system.dbo.brands_models (product_id, brand_id, model_id),
+								PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
+							);
+
+
+CREATE TABLE erp_system.dbo.genset_specs	( category_id INT,
+														product_id INT,
+														brand_id INT,
+														model_id INT,
+														spec_id INT,
+														spec_name varchar(100),
+														rated_power decimal(18, 0),
+														rating_unit INT references erp_system.dbo.measure_units (id),
+														ltb_50 decimal(18, 0),
+														ltb_50_unit INT references erp_system.dbo.measure_units (id),
+														ltb_60 decimal(18, 0),
+														ltb_60_unit INT references erp_system.dbo.measure_units (id),
+														prp_50 decimal(18, 0),
+														prp_50_unit INT references erp_system.dbo.measure_units (id),
+														prp_60 decimal(18, 0),
+														prp_60_unit INT references erp_system.dbo.measure_units (id),
+														cooling VARCHAR(250),
+														tank VARCHAR(250),
+														load VARCHAR(250),
+														alternator VARCHAR(250),
+														is_valid bit,
+														valid_until datetime,
+														date_added datetime default getdate(),
+														
+														FOREIGN KEY(product_id, brand_id, model_id) REFERENCES erp_system.dbo.brands_models (product_id, brand_id, model_id),
+														PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
+													);
+
+CREATE TABLE erp_system.dbo.model_specs	(
+								date_added datetime default getdate(),
+								
+								added_by INT references employees_info(employee_id),
+								category_id INT references products_category(id),
+								product_id INT,
+								brand_id INT,
+								model_id INT,
+								spec_id INT,
+								
+								spec_name varchar(150),
+								
+								genset_rated_power decimal(18, 0),
+								genset_rating_unit INT references erp_system.dbo.measure_units (id),
+								genset_ltb_50 decimal(18, 0),
+								genset_ltb_50_unit INT references erp_system.dbo.measure_units (id),
+								genset_ltb_60 decimal(18, 0),
+								genset_ltb_60_unit INT references erp_system.dbo.measure_units (id),
+								genset_prp_50 decimal(18, 0),
+								genset_prp_50_unit INT references erp_system.dbo.measure_units (id),
+								genset_prp_60 decimal(18, 0),
+								genset_prp_60_unit INT references erp_system.dbo.measure_units (id),
+								genset_cooling VARCHAR(250),
+								genset_tank VARCHAR(250),
+								genset_load VARCHAR(250),
+								genset_alternator VARCHAR(250),
+								
+								ups_io_phase VARCHAR(50),
+								ups_rated_power decimal(18, 0),
+								ups_rating INT references erp_system.dbo.measure_units (id),
+								ups_backup_time_50 INT,
+								ups_backup_time_70 INT,
+								ups_backup_time_100 INT,
+								ups_input_power_factor VARCHAR(250),
+								ups_thdi VARCHAR(250),
+								ups_input_nominal_voltage VARCHAR(250),
+								ups_input_voltage VARCHAR(250),
+								ups_voltage_tolerance VARCHAR(250),
+								ups_output_power_factor VARCHAR(250),
+								ups_thdv VARCHAR(250),
+								ups_output_nominal_voltage VARCHAR(250),
+								ups_output_dc_voltage_range VARCHAR(250),
+								ups_overload_capability VARCHAR(250),
+								ups_efficiency VARCHAR(50),
+								ups_input_connection_type VARCHAR(250),
+								ups_front_panel VARCHAR(250),
+								ups_max_power VARCHAR(250),
+								ups_certificates VARCHAR(250),
+								ups_safety VARCHAR(250),
+								ups_emc VARCHAR(405),
+								ups_environmental_aspects VARCHAR(250),
+								ups_test_performance VARCHAR(250),
+								ups_protection_degree VARCHAR(250),
+								ups_transfer_voltage_limit VARCHAR(250),
+								ups_marking VARCHAR(50),
+								
+								is_valid bit,
+								valid_until datetime,
+								
+								FOREIGN KEY(product_id, brand_id, model_id) REFERENCES erp_system.dbo.brands_models (product_id, brand_id, model_id),
+								PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
+							);
 
 --WORLD MAP
 CREATE TABLE erp_system.dbo.countries						(	id INT PRIMARY KEY,
@@ -558,11 +629,6 @@ CREATE TABLE erp_system.dbo.employees_payroll_info	(	employee_id INT REFERENCES 
 														FOREIGN KEY (bic_code, branch_code) REFERENCES bank_branches(bic_code,branch_code)
 													);
 
-CREATE TABLE erp_system.dbo.employees_keys			(	employee_id INT REFERENCES employees_info(employee_id),												
-														sym_key VARBINARY(MAX),
-														PRIMARY KEY (employee_id)
-													);
-																
 CREATE TABLE erp_system.dbo.employees_basic_salaries			(	employee_id INT REFERENCES employees_info(employee_id),												
 																	gross_salary VARBINARY(MAX),
 																	insurance_and_taxes VARBINARY(MAX),
@@ -573,16 +639,13 @@ CREATE TABLE erp_system.dbo.employees_basic_salaries			(	employee_id INT REFEREN
 																	PRIMARY KEY (employee_id, due_year, due_month)
 																);
 																
-CREATE TABLE erp_system.dbo.employees_monthly_salaries	(	employee_id INT,		
-															bic_code VARCHAR(50),
-															branch_code INT,
+CREATE TABLE erp_system.dbo.employees_monthly_salaries	(	employee_id INT REFERENCES employees_info(employee_id),
 															due_year INT,
-															due_month INT,									
-															transaction_date DATETIME,
+															due_month INT,												
+															payroll_type INT REFERENCES payroll_types(id),
 															salary_due VARBINARY(MAX),
 															date_added DATETIME DEFAULT getdate(),
-															PRIMARY KEY (employee_id, due_year, due_month),
-															FOREIGN KEY (employee_id, bic_code, branch_code) REFERENCES employees_payroll_info(employee_id, bic_code, branch_code)
+															PRIMARY KEY (employee_id, due_year, due_month)
 														);	
 														
 CREATE TABLE erp_system.dbo.employees_attendance		( 	employee_id INT REFERENCES employees_info(employee_id),
@@ -1812,4 +1875,65 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT,
 																	FOREIGN KEY (order_serial) REFERENCES outgoing_purchase_orders(order_serial)
 																	PRIMARY KEY (order_serial,qoutation_serial,requestor_id,rfp_serial,rfp_version,item_no)
 																);
-																							
+-------------- PRODUCT SUPPORT QUERIES
+CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
+															report_date DATETIME,
+
+															report_id varchar(50),
+
+															work_order_serial INT,
+															work_order_product_number INT,
+															work_order_model_serial_id INT,
+
+															maintenance_contract_serial INT,
+															maintenance_contract_version INT,
+															maintenance_contract_product_number INT,
+															maintenance_contract_model_serial_id INT,
+
+															branch_serial INT REFERENCES erp_system.dbo.company_address(address_serial),
+															employee_id INT REFERENCES erp_system.dbo.employees_info(employee_id),
+															
+															reason_of_report INT REFERENCES erp_system.dbo.missions_types(id),
+															
+															input_v1 INT,
+															input_v2 INT,
+															input_v3 INT,
+															input_a1 INT,
+															input_a2 INT,
+															input_a3 INT,
+															input_freq INT,
+															input_pe_n INT,
+															
+															output_v1 INT,
+															output_v2 INT,
+															output_v3 INT,
+															output_a1 INT,
+															output_a2 INT,
+															output_a3 INT,
+															output_freq INT,
+															output_pe_n INT,
+															
+															bypass_v1 INT,
+															bypass_v2 INT,
+															bypass_v3 INT,
+
+															room_temp BIT,
+															cleaning_ups BIT,
+															battery_temp BIT,
+															battery_pos BIT,
+															battery_neg BIT,
+
+															equipment_status_before_service NVARCHAR(300),
+															equipment_status_after_service NVARCHAR(300),
+
+															report_notes NVARCHAR(1000),
+
+															added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
+															report_status INT REFERENCES erp_system.dbo.approvals_status(id),
+															date_added DATETIME DEFAULT getdate(),
+
+															FOREIGN KEY (maintenance_contract_serial, maintenance_contract_version, maintenance_contract_product_number, maintenance_contract_model_serial_id) REFERENCES erp_system.dbo.maintenance_contracts_products_serials(contract_serial, contract_version, product_number, serial_id),
+															
+															FOREIGN KEY (work_order_serial, work_order_product_number, work_order_model_serial_id) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id)
+														);
+
