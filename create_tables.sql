@@ -667,6 +667,8 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 
 															report_id varchar(50),
 
+															mission_serial INT REFERENCES erp_system.dbo.missions(mission_serial),
+
 															work_order_serial INT,
 															work_order_product_number INT,
 															work_order_model_serial_id INT,
@@ -723,6 +725,12 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															FOREIGN KEY (work_order_serial, work_order_product_number, work_order_model_serial_id) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id)
 														);
 
+CREATE TABLE erp_system.dbo.service_reports_approvals_rejections ( report_serial INT REFERENCES service_reports,
+																     approving_personnel INT REFERENCES employees_info,
+																	 comments nvarchar(150),
+																	 date_added DATETIME DEFAULT GETDATE(),
+																	 PRIMARY KEY(report_serial, approving_personnel)
+																 );
 
 														
 CREATE TABLE erp_system.dbo.vacation_leave_requests		(	request_serial INT PRIMARY KEY,
@@ -1253,7 +1261,19 @@ CREATE TABLE erp_system.dbo.work_orders_products_edit_log (	order_serial INT,
 															FOREIGN KEY (product_category) REFERENCES products_category(id),
 															FOREIGN KEY (product_type,product_brand,product_model) REFERENCES brands_models(product_id,brand_id,model_id),
 															);															
-													
+
+CREATE TABLE erp_system.dbo.work_orders_products_serials (	order_serial INT,
+															product_number INT, 
+															serial_id INT,
+															serial varchar(100),
+															serial_status INT REFERENCES erp_system.dbo.orders_status(id),
+
+															date_added DATETIME DEFAULT getdate(),
+															FOREIGN KEY (order_serial, product_number) REFERENCES erp_system.dbo.work_orders_products_info(order_serial, product_number),
+															PRIMARY KEY (order_serial, product_number, serial_id)
+														 );														
+
+
 CREATE TABLE erp_system.dbo.work_orders_project_locations	(	order_serial INT REFERENCES work_orders(order_serial),
 																project_serial INT,
 																location_id INT,
