@@ -591,6 +591,32 @@ CREATE TABLE erp_system.dbo.employees_excluded_attendance	( 	employee_id INT REF
 																PRIMARY KEY (employee_id)
 															);	
 
+--SECURITY AND ACCESS
+CREATE TABLE erp_system.dbo.software_modules	( 	module_id INT PRIMARY KEY,
+													module_name VARCHAR(50)
+												);	
+												
+CREATE TABLE erp_system.dbo.module_features	( 	module_id INT REFERENCES software_modules(module_id),
+												feature_id INT,
+												feature_name VARCHAR(50)
+												PRIMARY KEY (module_id, feature_id)	
+											);
+												
+CREATE TABLE erp_system.dbo.user_roles		( 	department INT REFERENCES departments_type(id),
+												team INT REFERENCES teams_type(id),
+												position INT REFERENCES positions_type(id),
+												module_id INT,
+												feature_id INT,
+												allowed_department INT REFERENCES departments_type(id),
+												allowed_team INT REFERENCES teams_type(id),
+												d_read BIT,
+												d_write BIT,
+												d_edit BIT,
+												d_delete BIT,
+												d_admin BIT,
+												FOREIGN KEY (module_id, feature_id) REFERENCES module_features(module_id, feature_id),
+												PRIMARY KEY (department,team,position,module_id,feature_id,allowed_department,allowed_team)
+											);	
 --LEAVES AND PETITIONS					
 CREATE TABLE erp_system.dbo.petitions_requests			(	request_serial INT PRIMARY KEY,
 															petition_type INT REFERENCES attendance_excuses(id),
