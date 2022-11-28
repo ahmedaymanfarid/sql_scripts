@@ -283,82 +283,114 @@ CREATE TABLE erp_system.dbo.models_summary_points	(	product_id INT,
 														PRIMARY KEY (product_id,brand_id,model_id,points_id)
 													);		
 
-CREATE TABLE erp_system.dbo.model_specs	(
-								date_added datetime default getdate(),
-								
-								added_by INT references employees_info(employee_id),
-								category_id INT references products_category(id),
-								product_id INT,
-								brand_id INT,
-								model_id INT,
-								spec_id INT,
-								
-								spec_name varchar(150),
-								
-								genset_rated_power decimal(18, 0),
-								genset_rating_unit INT references erp_system.dbo.measure_units (id),
-								genset_ltb_50 decimal(18, 0),
-								genset_ltb_50_unit INT references erp_system.dbo.measure_units (id),
-								genset_ltb_60 decimal(18, 0),
-								genset_ltb_60_unit INT references erp_system.dbo.measure_units (id),
-								genset_prp_50 decimal(18, 0),
-								genset_prp_50_unit INT references erp_system.dbo.measure_units (id),
-								genset_prp_60 decimal(18, 0),
-								genset_prp_60_unit INT references erp_system.dbo.measure_units (id),
-								genset_cooling VARCHAR(250),
-								genset_tank VARCHAR(250),
-								genset_load VARCHAR(250),
-								genset_alternator VARCHAR(250),
-								
-								ups_io_phase VARCHAR(50),
-								ups_rated_power decimal(18, 0),
-								ups_rating INT references erp_system.dbo.measure_units (id),
-								ups_backup_time_50 INT,
-								ups_backup_time_70 INT,
-								ups_backup_time_100 INT,
-								ups_input_power_factor VARCHAR(250),
-								ups_thdi VARCHAR(250),
-								ups_input_nominal_voltage VARCHAR(250),
-								ups_input_voltage VARCHAR(250),
-								ups_voltage_tolerance VARCHAR(250),
-								ups_output_power_factor VARCHAR(250),
-								ups_thdv VARCHAR(250),
-								ups_output_nominal_voltage VARCHAR(250),
-								ups_output_dc_voltage_range VARCHAR(250),
-								ups_overload_capability VARCHAR(250),
-								ups_efficiency VARCHAR(50),
-								ups_input_connection_type VARCHAR(250),
-								ups_front_panel VARCHAR(250),
-								ups_max_power VARCHAR(250),
-								ups_certificates VARCHAR(250),
-								ups_safety VARCHAR(250),
-								ups_emc VARCHAR(405),
-								ups_environmental_aspects VARCHAR(250),
-								ups_test_performance VARCHAR(250),
-								ups_protection_degree VARCHAR(250),
-								ups_transfer_voltage_limit VARCHAR(250),
-								ups_marking VARCHAR(50),
-								
-								is_valid bit,
-								valid_until datetime,
-								
-								FOREIGN KEY(product_id, brand_id, model_id) REFERENCES erp_system.dbo.brands_models (product_id, brand_id, model_id),
-								PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
-							);
+CREATE TABLE erp_system.dbo.model_specs	(	date_added datetime default getdate(),
+											
+											added_by INT references employees_info(employee_id),
+											category_id INT references products_category(id),
+											product_id INT,
+											brand_id INT,
+											model_id INT,
+											spec_id INT,
+											
+											spec_name varchar(150),
+											
+											genset_rated_power decimal(18, 0),
+											genset_rating_unit INT references erp_system.dbo.measure_units (id),
+											genset_ltb_50 decimal(18, 0),
+											genset_ltb_50_unit INT references erp_system.dbo.measure_units (id),
+											genset_ltb_60 decimal(18, 0),
+											genset_ltb_60_unit INT references erp_system.dbo.measure_units (id),
+											genset_prp_50 decimal(18, 0),
+											genset_prp_50_unit INT references erp_system.dbo.measure_units (id),
+											genset_prp_60 decimal(18, 0),
+											genset_prp_60_unit INT references erp_system.dbo.measure_units (id),
+											genset_cooling VARCHAR(250),
+											genset_tank VARCHAR(250),
+											genset_load VARCHAR(250),
+											genset_alternator VARCHAR(250),
+											
+											ups_io_phase VARCHAR(50),
+											ups_rated_power decimal(18, 0),
+											ups_rating INT references erp_system.dbo.measure_units (id),
+											ups_backup_time_50 INT,
+											ups_backup_time_70 INT,
+											ups_backup_time_100 INT,
+											ups_input_power_factor VARCHAR(250),
+											ups_thdi VARCHAR(250),
+											ups_input_nominal_voltage VARCHAR(250),
+											ups_input_voltage VARCHAR(250),
+											ups_voltage_tolerance VARCHAR(250),
+											ups_output_power_factor VARCHAR(250),
+											ups_thdv VARCHAR(250),
+											ups_output_nominal_voltage VARCHAR(250),
+											ups_output_dc_voltage_range VARCHAR(250),
+											ups_overload_capability VARCHAR(250),
+											ups_efficiency VARCHAR(50),
+											ups_input_connection_type VARCHAR(250),
+											ups_front_panel VARCHAR(250),
+											ups_max_power VARCHAR(250),
+											ups_certificates VARCHAR(250),
+											ups_safety VARCHAR(250),
+											ups_emc VARCHAR(405),
+											ups_environmental_aspects VARCHAR(250),
+											ups_test_performance VARCHAR(250),
+											ups_protection_degree VARCHAR(250),
+											ups_transfer_voltage_limit VARCHAR(250),
+											ups_marking VARCHAR(50),
+											
+											is_valid bit,
+											valid_until datetime,
+											
+											FOREIGN KEY(product_id, brand_id, model_id) REFERENCES erp_system.dbo.brands_models (product_id, brand_id, model_id),
+											PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
+										);
 
+--GENERIC PRODUCTS
+CREATE TABLE erp_system.dbo.generic_products_category	(	category_id INT PRIMARY KEY,
+															category_name VARCHAR(50),
+															date_added DATETIME DEFAULT getdate()
+														);
+													
+CREATE TABLE erp_system.dbo.generic_products_type	(	category_id INT REFERENCES generic_products_category(category_id),
+														product_id INT,
+														product_name VARCHAR(50),
+														PRIMARY KEY (category_id,product_id)
+														date_added DATETIME DEFAULT getdate()
+													);
+
+													
+CREATE TABLE erp_system.dbo.generic_products_brands	(	category_id INT,
+														product_id INT,
+														brand_id INT,
+														brand_name VARCHAR(50),
+														date_added DATETIME DEFAULT getdate(),
+														FOREIGN KEY (category_id,product_id) REFERENCES generic_products_type(category_id,product_id),
+														PRIMARY KEY (category_id,product_id,brand_id)
+													);
+
+CREATE TABLE erp_system.dbo.generic_products_models	(	category_id INT,
+														product_id INT,
+														brand_id INT,
+														model_id INT,
+														model_name VARCHAR(50),
+														date_added DATETIME DEFAULT getdate(),
+														FOREIGN KEY (category_id,product_id,brand_id) REFERENCES generic_products_brands(category_id,product_id,brand_id),
+														PRIMARY KEY (category_id,product_id,brand_id,model_id)
+													);
+													
 --WORLD MAP
-CREATE TABLE erp_system.dbo.countries						(	id INT PRIMARY KEY,
+CREATE TABLE erp_system.dbo.countries				(	id INT PRIMARY KEY,
 														country VARCHAR(50),
 														date_added DATETIME DEFAULT getdate()
 													);
 
-CREATE TABLE erp_system.dbo.states_governorates			(	country INT REFERENCES countries(id),
+CREATE TABLE erp_system.dbo.states_governorates		(	country INT REFERENCES countries(id),
 														id INT PRIMARY KEY,
 														state_governorate VARCHAR(50),
 														date_added DATETIME DEFAULT getdate()
 													);
 											
-CREATE TABLE erp_system.dbo.cities							(	state_governorate INT REFERENCES states_governorates(id),
+CREATE TABLE erp_system.dbo.cities					(	state_governorate INT REFERENCES states_governorates(id),
 														id INT PRIMARY KEY,
 														city VARCHAR(50),
 														date_added DATETIME DEFAULT getdate()
