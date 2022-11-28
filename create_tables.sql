@@ -346,6 +346,40 @@ CREATE TABLE erp_system.dbo.model_specs	(
 								PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
 							);
 
+--GENERIC PRODUCTS TABLES
+						
+CREATE TABLE erp_system.dbo.generic_products_categorys(	product_category_id INT PRIMARY KEY,
+														category_name NVARCHAR(150),
+														date_added DATETIME DEFAULT getdate()
+													 );
+													
+CREATE TABLE erp_system.dbo.generic_products_types	(   product_category_id INT REFERENCES generic_products_categorys(product_category_id),
+														product_type_id INT,
+														product_name NVARCHAR(150),
+														date_added DATETIME DEFAULT getdate(),
+														PRIMARY KEY (product_category_id,product_type_id)
+													);
+
+CREATE TABLE erp_system.dbo.generic_products_brands (	product_category_id INT,
+														product_type_id INT,
+														product_brand_id INT,
+														brand_name NVARCHAR(150),
+														date_added DATETIME DEFAULT getdate(),
+														FOREIGN KEY (product_category_id,product_type_id) REFERENCES generic_products_types(product_category_id,product_type_id),
+														PRIMARY KEY (product_category_id,product_type_id, product_brand_id)
+													);
+
+CREATE TABLE erp_system.dbo.generic_products_models	(	product_category_id INT,
+														product_type_id INT,
+														product_brand_id INT,
+														product_model_id INT,
+														model_name NVARCHAR(150),
+														date_added DATETIME DEFAULT getdate(),
+														FOREIGN KEY (product_category_id,product_type_id, product_brand_id) REFERENCES generic_products_brands(product_category_id,product_type_id, product_brand_id),
+														PRIMARY KEY (product_category_id,product_type_id, product_brand_id, product_model_id)
+													);
+
+
 --WORLD MAP
 CREATE TABLE erp_system.dbo.countries						(	id INT PRIMARY KEY,
 														country VARCHAR(50),
@@ -750,12 +784,12 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															
 															FOREIGN KEY (work_order_serial, work_order_product_number, work_order_model_serial_id) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id)
 														);
-
-CREATE TABLE erp_system.dbo.service_reports_approvals_rejections ( report_serial INT REFERENCES service_reports,
+CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_serial INT REFERENCES service_reports,
 																     approving_personnel INT REFERENCES employees_info,
+																	 approval_serial INT,
 																	 comments nvarchar(150),
 																	 date_added DATETIME DEFAULT GETDATE(),
-																	 PRIMARY KEY(report_serial, approving_personnel)
+																	 PRIMARY KEY(report_serial, approving_personnel, approval_serial)
 																 );
 
 														
