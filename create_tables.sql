@@ -1635,13 +1635,6 @@ CREATE TABLE erp_system.dbo.projects_assignees_log	(   update_serial INT PRIMARY
 														
 
 --INVENTORY
-CREATE TABLE erp_system.dbo.generic_brands			(	brand_id INT PRIMARY KEY,
-														brand_name NVARCHAR(50),
-														added_by INT REFERENCES employees_info(employee_id),
-														date_added DATETIME DEFAULT getdate()
-														
-													);
-					
 CREATE TABLE erp_system.dbo.generic_products_category	(	category_id INT PRIMARY KEY,
 															category_name VARCHAR(50),
 															date_added DATETIME DEFAULT getdate()
@@ -1653,14 +1646,21 @@ CREATE TABLE erp_system.dbo.generic_products_type	(	category_id INT REFERENCES g
 														PRIMARY KEY (category_id,product_id)
 														date_added DATETIME DEFAULT getdate()
 													);
-																			
+
+CREATE TABLE erp_system.dbo.generic_brands			(	brand_id INT PRIMARY KEY,
+														brand_name NVARCHAR(50),
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate()
+														
+													);
+													
 CREATE TABLE erp_system.dbo.generic_products_brand (	category_id INT,
 														product_id INT,
 														brand_id INT REFERENCES generic_brands(brand_id),
 														brand_name NVARCHAR(150),
 														date_added DATETIME DEFAULT getdate(),
-														FOREIGN KEY (product_category_id,product_type_id) REFERENCES generic_products_type(product_category_id,product_type_id),
-														PRIMARY KEY (product_category_id,product_type_id, product_brand_id)
+														FOREIGN KEY (category_id,product_id) REFERENCES generic_products_type(category_id,product_id),
+														PRIMARY KEY (category_id,product_id, brand_id)
 													);
 
 CREATE TABLE erp_system.dbo.generic_products_model	(	category_id INT,
@@ -1687,8 +1687,8 @@ CREATE TABLE erp_system.dbo.supplier_brands			(	supplier_serial INT REFERENCES s
 														brand_id INT,
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
-														FOREIGN KEY (product_category_id,product_type_id, product_brand_id) REFERENCES PRIMARY KEY generic_products_brand(product_category_id,product_type_id, product_brand_id)
-														PRIMARY KEY (supplier_serial,product_category_id,product_type_id, product_brand_id)
+														FOREIGN KEY (category_id,product_id, brand_id) REFERENCES PRIMARY KEY generic_products_brand(category_id,product_id, brand_id)
+														PRIMARY KEY (supplier_serial,category_id,product_id, brand_id)
 													);
 													
 CREATE TABLE erp_system.dbo.supplier_branches		(	branch_serial INT PRIMARY KEY,
