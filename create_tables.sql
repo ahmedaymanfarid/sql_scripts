@@ -4,27 +4,23 @@ CREATE TABLE erp_system.dbo.time_units						(	id INT PRIMARY KEY,
 														date_added DATETIME DEFAULT getdate()
 													);			
 													
-CREATE TABLE erp_system.dbo.client_generic_work_fields			( 	id INT PRIMARY KEY,
-																	generic_work_field VARCHAR(50),
-																	date_added DATETIME DEFAULT getdate()
-																);
+CREATE TABLE erp_system.dbo.client_generic_work_fields		( 	id INT PRIMARY KEY,
+																generic_work_field VARCHAR(50),
+																date_added DATETIME DEFAULT getdate()
+															);
 
-CREATE TABLE erp_system.dbo.client_specific_work_fields			( 	generic_field_name INT REFERENCES client_generic_work_fields(id),
-														id INT PRIMARY KEY,
-														specific_work_field VARCHAR (50),
-														date_added DATETIME DEFAULT getdate()
-													);
+CREATE TABLE erp_system.dbo.client_specific_work_fields		( 	generic_field_name INT REFERENCES client_generic_work_fields(id),
+																id INT PRIMARY KEY,
+																specific_work_field VARCHAR (50),
+																date_added DATETIME DEFAULT getdate()
+															);
 
-CREATE TABLE erp_system.dbo.supplier_generic_work_fields		( 	id INT PRIMARY KEY,
-																	generic_work_field VARCHAR(50),
-																	date_added DATETIME DEFAULT getdate()
-																);
 
-CREATE TABLE erp_system.dbo.supplier_specific_work_fields		( 	generic_field_name INT REFERENCES supplier_generic_work_fields(id),
-																	id INT PRIMARY KEY,
-																	specific_work_field VARCHAR (50),
-																	date_added DATETIME DEFAULT getdate()
-																);
+
+CREATE TABLE erp_system.dbo.supplier_fields		( 	id INT PRIMARY KEY,
+													field_name VARCHAR (50),
+													date_added DATETIME DEFAULT getdate()
+												);
 
 CREATE TABLE erp_system.dbo.work_forms		( 	id INT PRIMARY KEY,
 												work_form VARCHAR (50),
@@ -345,39 +341,6 @@ CREATE TABLE erp_system.dbo.model_specs	(	date_added datetime default getdate(),
 											PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
 										);
 
---GENERIC PRODUCTS
-CREATE TABLE erp_system.dbo.generic_products_category	(	category_id INT PRIMARY KEY,
-															category_name VARCHAR(50),
-															date_added DATETIME DEFAULT getdate()
-														);
-													
-CREATE TABLE erp_system.dbo.generic_products_type	(	category_id INT REFERENCES generic_products_category(category_id),
-														product_id INT,
-														product_name VARCHAR(50),
-														PRIMARY KEY (category_id,product_id)
-														date_added DATETIME DEFAULT getdate()
-													);
-
-													
-CREATE TABLE erp_system.dbo.generic_products_brands	(	category_id INT,
-														product_id INT,
-														brand_id INT,
-														brand_name VARCHAR(50),
-														date_added DATETIME DEFAULT getdate(),
-														FOREIGN KEY (category_id,product_id) REFERENCES generic_products_type(category_id,product_id),
-														PRIMARY KEY (category_id,product_id,brand_id)
-													);
-
-CREATE TABLE erp_system.dbo.generic_products_models	(	category_id INT,
-														product_id INT,
-														brand_id INT,
-														model_id INT,
-														model_name VARCHAR(50),
-														date_added DATETIME DEFAULT getdate(),
-														FOREIGN KEY (category_id,product_id,brand_id) REFERENCES generic_products_brands(category_id,product_id,brand_id),
-														PRIMARY KEY (category_id,product_id,brand_id,model_id)
-													);
-													
 --WORLD MAP
 CREATE TABLE erp_system.dbo.countries				(	id INT PRIMARY KEY,
 														country VARCHAR(50),
@@ -782,12 +745,12 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															
 															FOREIGN KEY (work_order_serial, work_order_product_number, work_order_model_serial_id) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id)
 														);
-
-CREATE TABLE erp_system.dbo.service_reports_approvals_rejections ( report_serial INT REFERENCES service_reports,
+CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_serial INT REFERENCES service_reports,
 																     approving_personnel INT REFERENCES employees_info,
+																	 approval_serial INT,
 																	 comments nvarchar(150),
 																	 date_added DATETIME DEFAULT GETDATE(),
-																	 PRIMARY KEY(report_serial, approving_personnel)
+																	 PRIMARY KEY(report_serial, approving_personnel, approval_serial)
 																 );
 
 														
@@ -1671,27 +1634,61 @@ CREATE TABLE erp_system.dbo.projects_assignees_log	(   update_serial INT PRIMARY
 													);													
 														
 
---PROCUREMENT
-CREATE TABLE erp_system.dbo.vendors					(	vendor_id INT PRIMARY KEY,
-														vendor_name NVARCHAR(50),
-														supplier_brand INT REFERENCES supplier_brands(id),
+--INVENTORY
+CREATE TABLE erp_system.dbo.generic_brands			(	brand_id INT PRIMARY KEY,
+														brand_name NVARCHAR(50),
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate()
 														
 													);
+					
+CREATE TABLE erp_system.dbo.generic_products_category	(	category_id INT PRIMARY KEY,
+															category_name VARCHAR(50),
+															date_added DATETIME DEFAULT getdate()
+														);
 													
+CREATE TABLE erp_system.dbo.generic_products_type	(	category_id INT REFERENCES generic_products_category(category_id),
+														product_id INT,
+														product_name VARCHAR(50),
+														PRIMARY KEY (category_id,product_id)
+														date_added DATETIME DEFAULT getdate()
+													);
+																			
+CREATE TABLE erp_system.dbo.generic_products_brand (	category_id INT,
+														product_id INT,
+														brand_id INT REFERENCES generic_brands(brand_id),
+														brand_name NVARCHAR(150),
+														date_added DATETIME DEFAULT getdate(),
+														FOREIGN KEY (product_category_id,product_type_id) REFERENCES generic_products_type(product_category_id,product_type_id),
+														PRIMARY KEY (product_category_id,product_type_id, product_brand_id)
+													);
+
+CREATE TABLE erp_system.dbo.generic_products_model	(	category_id INT,
+														product_id INT,
+														brand_id INT,
+														model_id INT,
+														model_name NVARCHAR(150),
+														date_added DATETIME DEFAULT getdate(),
+														FOREIGN KEY (category_id,product_id, brand_id) REFERENCES generic_products_brand(category_id,product_id, brand_id),
+														PRIMARY KEY (category_id,product_id, brand_id, model_id)
+													);
+
+--PROCUREMENT													
 CREATE TABLE erp_system.dbo.supplier_name			(	supplier_serial INT PRIMARY KEY,
 														supplier_name NVARCHAR(50),
-														supplier_brands INT REFERENCES supplier_specific_work_fields(id),
+														supplier_field INT REFERENCES supplier_fields(id),
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate()
 													);
 
-CREATE TABLE erp_system.dbo.vendor_suppliers		(	vendor_id INT REFERENCES vendors(vendor_id),
-														supplier_serial INT REFERENCES supplier_name(supplier_serial),
+CREATE TABLE erp_system.dbo.supplier_brands			(	supplier_serial INT REFERENCES supplier_name(supplier_serial),
+														category_id INT,
+														product_id INT,
+														brand_id INT,
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
-														PRIMARY KEY (vendor_id, supplier_serial)
+														FOREIGN KEY (product_category_id,product_type_id, product_brand_id) REFERENCES PRIMARY KEY generic_products_brand(product_category_id,product_type_id, product_brand_id)
+														PRIMARY KEY (supplier_serial,product_category_id,product_type_id, product_brand_id)
 													);
 													
 CREATE TABLE erp_system.dbo.supplier_branches		(	branch_serial INT PRIMARY KEY,
