@@ -1358,8 +1358,8 @@ CREATE TABLE erp_system.dbo.maintenance_offers		(	issue_date DATETIME DEFAULT ge
 																	PRIMARY KEY (offer_proposer,offer_serial,offer_version)
 																);
 
-CREATE TABLE erp_system.dbo.maintenance_offers_products_info	(	offer_serial INT,
-																	offer_proposer INT,
+CREATE TABLE erp_system.dbo.maintenance_offers_products_info	(	offer_proposer INT,
+																	offer_serial INT,
 																	offer_version INT,
 																	
 																	product_number INT,
@@ -1635,6 +1635,11 @@ CREATE TABLE erp_system.dbo.projects_assignees_log	(   update_serial INT PRIMARY
 														
 
 --INVENTORY
+CREATE TABLE erp_system.dbo.pricing_criteria		(	id INT PRIMARY KEY,
+														pricing_criteria VARCHAR(50),
+														date_added DATETIME DEFAULT GETDATE()
+													);
+														
 CREATE TABLE erp_system.dbo.generic_products_category	(	category_id INT PRIMARY KEY,
 															category_name VARCHAR(50),
 															date_added DATETIME DEFAULT GETDATE()
@@ -1667,11 +1672,95 @@ CREATE TABLE erp_system.dbo.generic_products_model	(	category_id INT,
 														brand_id INT,
 														model_id INT,
 														model_name NVARCHAR(150),
-														date_added DATETIME DEFAULT GETDATE(),
+														
+														item_unit INT REFERENCES measure_units(id),
+														
+														stock_category INT REFERENCES stock_categories(category_id),
+														
+														has_serial_number BIT,
+														
+														pricing_criteria INT REFERENCES pricing_criteria(id),
+														
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate(),
+														
 														FOREIGN KEY (category_id,product_id, brand_id) REFERENCES generic_products_brand(category_id,product_id, brand_id),
 														PRIMARY KEY (category_id,product_id, brand_id, model_id)
 													);
 
+
+CREATE TABLE erp_system.dbo.warehouse_locations		(	location_id INT REFERENCES districts(id),
+														nickname VARCHAR(50),
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate(),
+														PRIMARY KEY (location_id)
+													);
+
+CREATE TABLE erp_system.dbo.stock_categories		(	category_id INT PRIMARY KEY,
+														category_name VARCHAR(50),
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate(),
+													);
+													
+CREATE TABLE erp_system.dbo.stock					(	transaction_date DATETIME DEFAULT GETDATE(),
+														
+														transaction_serial INT,
+														transaction_item_serial INT,
+														
+														category_id INT,
+														product_id INT,
+														brand_id INT,
+														model_id INT,
+														
+														product_serial_number VARCHAR(50),
+														
+														item_price MONEY,
+														item_currency INT REFERENCES currencies_type(id),
+														
+														warehouse_location INT REFERENCES warehouse_locations(location_id),
+														
+														rfp_requestor_team INT,
+														rfp_serial INT,
+														rfp_version INT,
+														item_no INT,
+															
+														added_by INT REFERENCES employees_info(employee_id),
+														
+														FOREIGN KEY (category_id,product_id, brand_id, model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
+														FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
+														PRIMARY KEY (transaction_serial, transaction_item_serial)
+													);		
+
+													
+CREATE TABLE erp_system.dbo.stock_material_issuance	(	issuance_date DATETIME DEFAULT GETDATE(),
+														
+														issue_serial INT,
+														issue_item_serial INT,
+														
+														transaction_serial INT,
+														transaction_item_serial INT,
+														
+														rfp_requestor_team INT,
+														rfp_serial INT,
+														rfp_version INT,
+														rfp_item_no INT,
+														
+														order_serial INT,
+														order_product_no INT,
+																
+														contract_serial INT,
+														contract_version INT, 
+														contract_product_no INT,
+																	
+														added_by INT REFERENCES employees_info(employee_id),
+														
+														FOREIGN KEY (transaction_serial, transaction_item_serial) REFERENCES stock(transaction_serial, transaction_item_serial),
+														FOREIGN KEY (contract_serial, contract_version, contract_product_no) REFERENCES maintenance_contracts_products_info(contract_serial, contract_version, product_number),
+														FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
+														FOREIGN KEY (order_serial,order_product_no) REFERENCES work_orders_products_info(order_serial,product_number),
+														PRIMARY KEY (issue_serial, issue_item_serial)
+													);	
+													
 --PROCUREMENT													
 CREATE TABLE erp_system.dbo.supplier_name			(	supplier_serial INT PRIMARY KEY,
 														supplier_name NVARCHAR(50),
