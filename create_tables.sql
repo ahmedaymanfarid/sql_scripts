@@ -281,8 +281,8 @@ CREATE TABLE erp_system.dbo.models_summary_points	(	product_id INT,
 
 CREATE TABLE erp_system.dbo.model_specs	(	date_added datetime default getdate(),
 											
-											added_by INT references employees_info(employee_id),
-											category_id INT references products_category(id),
+											added_by INT REFERENCES employees_info(employee_id),
+											category_id INT REFERENCES products_category(id),
 											product_id INT,
 											brand_id INT,
 											model_id INT,
@@ -291,15 +291,15 @@ CREATE TABLE erp_system.dbo.model_specs	(	date_added datetime default getdate(),
 											spec_name varchar(150),
 											
 											genset_rated_power decimal(18, 0),
-											genset_rating_unit INT references erp_system.dbo.measure_units (id),
+											genset_rating_unit INT REFERENCES erp_system.dbo.measure_units (id),
 											genset_ltb_50 decimal(18, 0),
-											genset_ltb_50_unit INT references erp_system.dbo.measure_units (id),
+											genset_ltb_50_unit INT REFERENCES erp_system.dbo.measure_units (id),
 											genset_ltb_60 decimal(18, 0),
-											genset_ltb_60_unit INT references erp_system.dbo.measure_units (id),
+											genset_ltb_60_unit INT REFERENCES erp_system.dbo.measure_units (id),
 											genset_prp_50 decimal(18, 0),
-											genset_prp_50_unit INT references erp_system.dbo.measure_units (id),
+											genset_prp_50_unit INT REFERENCES erp_system.dbo.measure_units (id),
 											genset_prp_60 decimal(18, 0),
-											genset_prp_60_unit INT references erp_system.dbo.measure_units (id),
+											genset_prp_60_unit INT REFERENCES erp_system.dbo.measure_units (id),
 											genset_cooling VARCHAR(250),
 											genset_tank VARCHAR(250),
 											genset_load VARCHAR(250),
@@ -307,7 +307,7 @@ CREATE TABLE erp_system.dbo.model_specs	(	date_added datetime default getdate(),
 											
 											ups_io_phase VARCHAR(50),
 											ups_rated_power decimal(18, 0),
-											ups_rating INT references erp_system.dbo.measure_units (id),
+											ups_rating INT REFERENCES erp_system.dbo.measure_units (id),
 											ups_backup_time_50 INT,
 											ups_backup_time_70 INT,
 											ups_backup_time_100 INT,
@@ -1299,7 +1299,7 @@ CREATE TABLE erp_system.dbo.work_orders_project_locations	(	order_serial INT REF
 																project_serial INT,
 																location_id INT,
 																date_added DATETIME default getdate(),
-																FOREIGN KEY (project_serial, location_id) references client_project_locations(project_serial, location_id),
+																FOREIGN KEY (project_serial, location_id) REFERENCES client_project_locations(project_serial, location_id),
 																PRIMARY KEY (order_serial, project_serial, location_id)
 															);
 
@@ -1311,7 +1311,7 @@ CREATE TABLE erp_system.dbo.work_orders_project_edit_log	(	order_serial INT,
 																date_added DATETIME default getdate(),
 																PRIMARY KEY (order_serial, edit_serial, location_id),
 																FOREIGN KEY (order_serial) REFERENCES work_orders(order_serial),
-																FOREIGN KEY (project_serial, location_id) references client_project_locations(project_serial, location_id),
+																FOREIGN KEY (project_serial, location_id) REFERENCES client_project_locations(project_serial, location_id),
 															);															
 
 CREATE TABLE dbo.work_orders_drawings						(	order_serial int PRIMARY KEY,
@@ -1637,28 +1637,27 @@ CREATE TABLE erp_system.dbo.projects_assignees_log	(   update_serial INT PRIMARY
 --INVENTORY
 CREATE TABLE erp_system.dbo.generic_products_category	(	category_id INT PRIMARY KEY,
 															category_name VARCHAR(50),
-															date_added DATETIME DEFAULT getdate()
+															date_added DATETIME DEFAULT GETDATE()
 														);
 													
 CREATE TABLE erp_system.dbo.generic_products_type	(	category_id INT REFERENCES generic_products_category(category_id),
 														product_id INT,
 														product_name VARCHAR(50),
+														date_added DATETIME DEFAULT GETDATE(),
 														PRIMARY KEY (category_id,product_id)
-														date_added DATETIME DEFAULT getdate()
 													);
 
 CREATE TABLE erp_system.dbo.generic_brands			(	brand_id INT PRIMARY KEY,
 														brand_name NVARCHAR(50),
 														added_by INT REFERENCES employees_info(employee_id),
-														date_added DATETIME DEFAULT getdate()
+														date_added DATETIME DEFAULT GETDATE()
 														
 													);
 													
 CREATE TABLE erp_system.dbo.generic_products_brand (	category_id INT,
 														product_id INT,
 														brand_id INT REFERENCES generic_brands(brand_id),
-														brand_name NVARCHAR(150),
-														date_added DATETIME DEFAULT getdate(),
+														date_added DATETIME DEFAULT GETDATE(),
 														FOREIGN KEY (category_id,product_id) REFERENCES generic_products_type(category_id,product_id),
 														PRIMARY KEY (category_id,product_id, brand_id)
 													);
@@ -1668,7 +1667,7 @@ CREATE TABLE erp_system.dbo.generic_products_model	(	category_id INT,
 														brand_id INT,
 														model_id INT,
 														model_name NVARCHAR(150),
-														date_added DATETIME DEFAULT getdate(),
+														date_added DATETIME DEFAULT GETDATE(),
 														FOREIGN KEY (category_id,product_id, brand_id) REFERENCES generic_products_brand(category_id,product_id, brand_id),
 														PRIMARY KEY (category_id,product_id, brand_id, model_id)
 													);
@@ -1687,7 +1686,7 @@ CREATE TABLE erp_system.dbo.supplier_brands			(	supplier_serial INT REFERENCES s
 														brand_id INT,
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
-														FOREIGN KEY (category_id,product_id, brand_id) REFERENCES PRIMARY KEY generic_products_brand(category_id,product_id, brand_id)
+														FOREIGN KEY (category_id,product_id, brand_id) REFERENCES generic_products_brand(category_id,product_id, brand_id),
 														PRIMARY KEY (supplier_serial,category_id,product_id, brand_id)
 													);
 													
@@ -1776,135 +1775,127 @@ CREATE TABLE erp_system.dbo.rfps_item_vendors			(	rfp_requestor_team INT,
 															rfp_serial INT,
 															rfp_version INT,
 															item_no INT,
-															vendor_id INT REFERENCES vendors(vendor_id),
+															brand_id INT REFERENCES generic_brands(brand_id),
 															FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no,vendor_id)
 														);
 
---AYMAN										
-CREATE TABLE erp_system.dbo.incoming_qoutations	(	issue_date DATETIME,
-
-													qoutation_serial INT PRIMARY KEY,
-													
-													qoutation_id VARCHAR(50),
-													
-													procurement_officer INT,
-													supplier_address_serial INT,
-													supplier_contact INT,
-													
-													price_currency INT REFERENCES currencies_type(id),
-													price_value MONEY,
-													
-													percent_down_payment INT,
-													percent_on_delivery INT,
-													percent_on_installation INT,
-													
-													delivery_period_minimum INT,
-													delivery_period_maximum INT,
-													delivery_time_unit INT REFERENCES time_units(id),
-													
-													delivery_point INT REFERENCES delivery_points(id),
-													contract_type INT REFERENCES contracts_type(id),
-													
-													warranty_period INT,
-													warranty_time_unit INT REFERENCES time_units(id),
-													
-													qoutation_validity_period INT,
-													qoutation_validity_unit INT REFERENCES time_units(id),
-													
-													qoutation_status INT REFERENCES offers_status(id),
-													qoutation_notes VARCHAR(150),
-													
-													date_added DATETIME DEFAULT getdate(),											
-													
-													FOREIGN KEY (procurement_officer,supplier_address_serial,supplier_contact) REFERENCES contact_person_info(sales_person_id,branch_serial,contact_id)
-												);
-
+CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
+															rfp_serial INT,
+															rfp_version INT,
+															item_no INT,
+															category_id INT,
+															product_id INT,
+															brand_id INT,
+															model_id INT,
+															added_by INT REFERENCES employees_info(employee_id),
+															date_added DATETIME DEFAULT getdate(),
+															FOREIGN KEY (category_id,product_id, brand_id, model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
+															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
+														);
+														
 --SAMEH
-CREATE TABLE erp_system.dbo.incoming_quotations (
-													issue_date datetime not null,
+CREATE TABLE erp_system.dbo.incoming_quotations (	issue_date datetime,
+													
 													rfp_requestor_team int,
 													rfp_serial int,
 													rfp_version int,
-													serial int not null,
-													proposer int not null foreign key references employees_info(employee_id),
-													branch_serial int not null,
-													contact_id int not null,
+													
+													qoutation_serial int PRIMARY KEY,
 													quotation_id varchar(50),
-													price_currency int foreign key references currencies_type(id),
+													
+													procurement_officer int FOREIGN KEY REFERENCES employees_info(employee_id),
+													
+													supplier_address_serial int,
+													supplier_contact int,
+													
+													
+													price_currency int FOREIGN KEY REFERENCES currencies_type(id),
 													price_value money,
+													vat_condition int FOREIGN KEY REFERENCES vat_condition(id),
+													
 													percent_down_payment int,
 													percent_on_delivery int,
 													percent_payable int,
 													payable_period int,
-													payable_time_unit int foreign key references time_units(id),
+													payable_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													payable_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+													
 													delivery_period_min int,
 													delivery_period_max int,
-													delivery_time_unit int foreign key references time_units(id),
-													delivery_point int foreign key references delivery_points(id),
-													contract_type int foreign key references contracts_type(id),
+													delivery_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													delivery_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+													
+													delivery_point int FOREIGN KEY REFERENCES delivery_points(id),
+													
+													contract_type int FOREIGN KEY REFERENCES contracts_type(id),
+													
 													warranty_period int,
-													warranty_time_unit int foreign key references time_units(id),
+													warranty_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													warranty_period_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+													
 													validity_period int,
-													validity_time_unit int foreign key references time_units(id),
-													delivery_time_condition int foreign key references condition_start_dates(id),
-													warranty_period_condition int foreign key references condition_start_dates(id),
-													vat_condition int foreign key references vat_condition(id),
-													status int foreign key references offers_status(id),
+													validity_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													
+													qoutation_status int FOREIGN KEY REFERENCES offers_status(id),
+													
 													notes nvarchar(150),
-													foreign key (rfp_requestor_team, rfp_serial, rfp_version) references rfps(rfp_requestor_team, rfp_serial, rfp_version),
-													primary key (rfp_requestor_team, rfp_serial, rfp_version, serial)
+													
+													added_by INT REFERENCES employees_info(employee_id),
+													date_added DATETIME DEFAULT getdate(),
+															
+													FOREIGN KEY (rfp_requestor_team, rfp_serial, rfp_version) REFERENCES rfps(rfp_requestor_team, rfp_serial, rfp_version),
+													FOREIGN KEY (supplier_address_serial, supplier_contact) REFERENCES supplier_contact_person_info(branch_serial, contact_id)
 													);
---AYMAN
-CREATE TABLE erp_system.dbo.incoming_qoutations_items	(	qoutation_serial INT REFERENCES incoming_qoutations(qoutation_serial),
-															
-															requestor_id INT,
-															rfp_serial INT,
-															rfp_version INT,
-															item_no INT,
-															
-															product_quantity INT,
-															product_price MONEY,
-															
-															date_added DATETIME DEFAULT getdate(),
-															
-															added_by INT REFERENCES employees_info(employee_id),
-															
-															FOREIGN KEY (requestor_id,rfp_serial,rfp_version,item_no) REFERENCES rfps_items(requestor_id,rfp_serial,rfp_version,item_no),
-															PRIMARY KEY (qoutation_serial,requestor_id,rfp_serial,rfp_version,item_no)
-														);
 
 --SAMEH
 CREATE TABLE erp_system.dbo.incoming_quotations_items ( rfp_requestor_team int,
 														rfp_serial int,
 														rfp_version int,
-														serial int,
-														item_number int,
+														
 														rfp_item_number int,
+														
+														qoutation_serial int REFERENCES incoming_quotations(qoutation_serial),
+														quotation_item_number int,
+														
 														quantity int,
-														measure_unit int foreign key references measure_units(id),
+														measure_unit int FOREIGN KEY REFERENCES measure_units(id),
 														price_value money,
-														foreign key(rfp_requestor_team, rfp_serial, rfp_version, serial) references incoming_quotations(rfp_requestor_team, rfp_serial, rfp_version, serial),
-														foreign key(rfp_requestor_team, rfp_serial, rfp_version, rfp_item_number) references rfps_items(rfp_requestor_team, rfp_serial, rfp_version, item_no),
-														primary key(rfp_requestor_team, rfp_serial, rfp_version, serial, item_number)
+														
+														supplier_serial INT,
+														category_id INT,
+														product_id INT,
+														brand_id INT,
+														
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate(),
+													
+														FOREIGN KEY (supplier_serial,category_id,product_id, brand_id) references supplier_brands(supplier_serial,category_id,product_id, brand_id),
+														FOREIGN KEY(rfp_requestor_team, rfp_serial, rfp_version, rfp_item_number) REFERENCES rfps_items(rfp_requestor_team, rfp_serial, rfp_version, item_no),
+														PRIMARY KEY(qoutation_serial, quotation_item_number)
 														);
+														
+
 														
 CREATE TABLE erp_system.dbo.outgoing_purchase_orders	(	issue_date DATETIME DEFAULT getdate(),											
 
 															order_serial INT PRIMARY KEY,
+															order_id VARCHAR(50),
 															
-															procurement_officer INT,
+															procurement_officer int FOREIGN KEY REFERENCES employees_info(employee_id),
+															
 															supplier_address_serial INT,
 															supplier_contact INT,
 															
-															order_id VARCHAR(50),
-															
-															price_currency INT REFERENCES currencies_type(id),
 															price_value MONEY,
+															price_currency INT REFERENCES currencies_type(id),
 															
 															percent_down_payment INT,
 															percent_on_delivery INT,
-															percent_on_installation INT,
+															percent_payable int,
+															payable_period int,
+															payable_time_unit int FOREIGN KEY REFERENCES time_units(id),
+															payable_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
 															
 															isDrawing BIT,
 															
@@ -1917,28 +1908,42 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders	(	issue_date DATETIME DEFAU
 															
 															warranty_period INT,
 															warranty_time_unit INT REFERENCES time_units(id),
+															warranty_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
 															
-															order_status INT REFERENCES orders_status(id),
+															delivered BIT,
+															documents_received BIT,
+															payment_done BIT,
+															invoice_received BIT,
+															
 															order_notes VARCHAR(150),
 															
+															added_by INT REFERENCES employees_info(employee_id),
 															date_added DATETIME DEFAULT getdate(),
 															
-															FOREIGN KEY (procurement_officer,supplier_address_serial,supplier_contact) REFERENCES contact_person_info(sales_person_id,branch_serial,contact_id)
+															FOREIGN KEY (supplier_address_serial, supplier_contact) REFERENCES supplier_contact_person_info(branch_serial, contact_id),
 														);														
 														
-CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT,
-																		
-																	qoutation_serial INT,
-																	requestor_id INT,
+CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT REFERENCES outgoing_purchase_orders(order_serial),
+																	order_item_no INT,
+																	
+																	rfp_requestor_team INT,
 																	rfp_serial INT,
 																	rfp_version INT,
-																	item_no INT,
+																	rfp_item_no INT,
 																	
+																	supplier_serial INT,
+																	category_id INT,
+																	product_id INT,
+																	brand_id INT,
+																	
+																	quantity int,
+																	measure_unit int FOREIGN KEY REFERENCES measure_units(id),
+																	price_value money,
+														
 																	added_by INT REFERENCES employees_info(employee_id),
-																	
 																	date_added DATETIME DEFAULT getdate(),
 																	
-																	FOREIGN KEY (qoutation_serial,requestor_id,rfp_serial,rfp_version,item_no) REFERENCES incoming_qoutations_items(qoutation_serial,requestor_id,rfp_serial,rfp_version,item_no),
-																	FOREIGN KEY (order_serial) REFERENCES outgoing_purchase_orders(order_serial)
-																	PRIMARY KEY (order_serial,qoutation_serial,requestor_id,rfp_serial,rfp_version,item_no)
+																	FOREIGN KEY (supplier_serial,category_id,product_id, brand_id) references supplier_brands(supplier_serial,category_id,product_id, brand_id),
+																	FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
+																	PRIMARY KEY (order_serial,order_item_no)
 																);
