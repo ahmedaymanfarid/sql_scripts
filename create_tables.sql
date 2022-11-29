@@ -1952,14 +1952,12 @@ CREATE TABLE erp_system.dbo.incoming_quotations_items ( rfp_requestor_team int,
 														price_value money,
 														
 														supplier_serial INT,
-														category_id INT,
-														product_id INT,
-														brand_id INT,
+														brand_serial INT,
 														
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
 													
-														FOREIGN KEY (supplier_serial,category_id,product_id, brand_id) references supplier_brands(supplier_serial,category_id,product_id, brand_id),
+														FOREIGN KEY (supplier_serial, brand_serial) references supplier_brands(supplier_serial, brand_serial),
 														FOREIGN KEY(rfp_requestor_team, rfp_serial, rfp_version, rfp_item_number) REFERENCES rfps_items(rfp_requestor_team, rfp_serial, rfp_version, item_no),
 														PRIMARY KEY(qoutation_serial, quotation_item_number)
 														);
@@ -2021,9 +2019,7 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT R
 																	rfp_item_no INT,
 																	
 																	supplier_serial INT,
-																	category_id INT,
-																	product_id INT,
-																	brand_id INT,
+																	brand_serial INT,
 																	
 																	quantity int,
 																	measure_unit int FOREIGN KEY REFERENCES measure_units(id),
@@ -2032,7 +2028,7 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT R
 																	added_by INT REFERENCES employees_info(employee_id),
 																	date_added DATETIME DEFAULT getdate(),
 																	
-																	FOREIGN KEY (supplier_serial,category_id,product_id, brand_id) references supplier_brands(supplier_serial,category_id,product_id, brand_id),
+																	FOREIGN KEY (supplier_serial, brand_serial) references supplier_brands(supplier_serial, brand_serial),
 																	FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 																	PRIMARY KEY (order_serial,order_item_no)
 																);
