@@ -740,7 +740,7 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
 															report_status INT REFERENCES erp_system.dbo.approvals_status(id),
 															date_added DATETIME DEFAULT getdate(),
-
+															service_report_type INT REFERENCES erp_system.dbo.service_reports_type(id),
 															FOREIGN KEY (maintenance_contract_serial, maintenance_contract_version, maintenance_contract_product_number, maintenance_contract_model_serial_id) REFERENCES erp_system.dbo.maintenance_contracts_products_serials(contract_serial, contract_version, product_number, serial_id),
 															
 															FOREIGN KEY (work_order_serial, work_order_product_number, work_order_model_serial_id) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id)
@@ -752,6 +752,11 @@ CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_seri
 																	 date_added DATETIME DEFAULT GETDATE(),
 																	 PRIMARY KEY(report_serial, approving_personnel, approval_serial)
 																 );
+																 
+CREATE TABLE erp_system.dbo.service_reports_type    (	id INT PRIMARY KEY,
+														report_type VARCHAR(50),
+														date_added DATETIME DEFAULT getdate()
+													);
 
 														
 CREATE TABLE erp_system.dbo.vacation_leave_requests		(	request_serial INT PRIMARY KEY,
