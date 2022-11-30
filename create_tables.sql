@@ -1887,6 +1887,19 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 															FOREIGN KEY (category_id,product_id, brand_id, model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
 														);
+
+CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT getdate(),
+													petty_cash_serial INT PRIMARY KEY,
+													rfp_requestor_team INT,
+													rfp_serial INT,
+													rfp_version INT,
+													rfp_item_no INT,
+													supplier_serial INT REFERENCES supplier_name(supplier_serial),
+													brand_id INT REFERENCES generic_brands(brand_id),
+													payment_value MONEY,
+													payment_date DATETIME,
+													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no)
+												);	
 														
 --SAMEH
 CREATE TABLE erp_system.dbo.incoming_quotations (	issue_date datetime,
