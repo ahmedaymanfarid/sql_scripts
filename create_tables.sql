@@ -1078,18 +1078,18 @@ CREATE TABLE erp_system.dbo.outgoing_quotations_items		(offer_proposer INT REFER
 	                                                         product_type INT,
 	                                                         product_brand INT,
 	                                                         product_model INT,
-	                                                         
+	                                                         product_spec INT,
+															 
 	                                                         product_quantity INT,
 	                                                         product_price MONEY,
 	                                                         
 	                                                         date_added DATETIME DEFAULT getdate(),
 	                                                         
-															 FOREIGN KEY (product_category) REFERENCES products_category(id),
-	                                                         FOREIGN KEY (product_type,product_brand,product_model) REFERENCES brands_models(product_id,brand_id,model_id),
+	                                                         FOREIGN KEY (product_category,product_type,product_brand,product_model,product_spec) REFERENCES model_specs(category_id, product_id,brand_id,model_id,spec_id),
 	                                                         FOREIGN KEY (offer_proposer,offer_serial,offer_version) REFERENCES outgoing_quotations(offer_proposer,offer_serial,offer_version),
 	                                                         PRIMARY KEY (offer_proposer,offer_serial,offer_version,product_number)
 );
-													
+
 CREATE TABLE erp_system.dbo.quotations_drawings		(	offer_proposer INT REFERENCES employees_info(employee_id),
 															offer_serial INT,
 															offer_version INT,
@@ -1639,15 +1639,21 @@ CREATE TABLE erp_system.dbo.pricing_criteria		(	id INT PRIMARY KEY,
 														pricing_criteria VARCHAR(50),
 														date_added DATETIME DEFAULT GETDATE()
 													);
-														
+
+CREATE TABLE erp_system.dbo.stock_categories		(	category_id INT PRIMARY KEY,
+														category_name NVARCHAR(50),
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate(),
+													);
+													
 CREATE TABLE erp_system.dbo.generic_products_category	(	category_id INT PRIMARY KEY,
-															category_name VARCHAR(50),
+															category_name NVARCHAR(50),
 															date_added DATETIME DEFAULT GETDATE()
 														);
 													
 CREATE TABLE erp_system.dbo.generic_products_type	(	category_id INT REFERENCES generic_products_category(category_id),
 														product_id INT,
-														product_name VARCHAR(50),
+														product_name NVARCHAR(50),
 														date_added DATETIME DEFAULT GETDATE(),
 														PRIMARY KEY (category_id,product_id)
 													);
@@ -1675,8 +1681,6 @@ CREATE TABLE erp_system.dbo.generic_products_model	(	category_id INT,
 														
 														item_unit INT REFERENCES measure_units(id),
 														
-														stock_category INT REFERENCES stock_categories(category_id),
-														
 														has_serial_number BIT,
 														
 														pricing_criteria INT REFERENCES pricing_criteria(id),
@@ -1690,77 +1694,121 @@ CREATE TABLE erp_system.dbo.generic_products_model	(	category_id INT,
 
 
 CREATE TABLE erp_system.dbo.warehouse_locations		(	location_id INT REFERENCES districts(id),
-														nickname VARCHAR(50),
+														nickname NVARCHAR(50),
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
 														PRIMARY KEY (location_id)
 													);
 
-CREATE TABLE erp_system.dbo.stock_categories		(	category_id INT PRIMARY KEY,
-														category_name VARCHAR(50),
-														added_by INT REFERENCES employees_info(employee_id),
-														date_added DATETIME DEFAULT getdate(),
-													);
-													
-CREATE TABLE erp_system.dbo.stock					(	transaction_date DATETIME DEFAULT GETDATE(),
+CREATE TABLE erp_system.dbo.material_entry_permits	(	transaction_date DATETIME DEFAULT GETDATE(),
 														
-														transaction_serial INT,
-														transaction_item_serial INT,
-														
-														category_id INT,
-														product_id INT,
-														brand_id INT,
-														model_id INT,
-														
-														product_serial_number VARCHAR(50),
-														
-														item_price MONEY,
-														item_currency INT REFERENCES currencies_type(id),
+														entry_permit_serial INT PRIMARY KEY,
 														
 														warehouse_location INT REFERENCES warehouse_locations(location_id),
 														
-														rfp_requestor_team INT,
-														rfp_serial INT,
-														rfp_version INT,
-														item_no INT,
-															
-														added_by INT REFERENCES employees_info(employee_id),
-														
-														FOREIGN KEY (category_id,product_id, brand_id, model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
-														FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
-														PRIMARY KEY (transaction_serial, transaction_item_serial)
-													);		
-
+														added_by INT REFERENCES employees_info(employee_id)
+													);
 													
-CREATE TABLE erp_system.dbo.stock_material_issuance	(	issuance_date DATETIME DEFAULT GETDATE(),
-														
-														issue_serial INT,
-														issue_item_serial INT,
-														
-														transaction_serial INT,
-														transaction_item_serial INT,
-														
-														rfp_requestor_team INT,
-														rfp_serial INT,
-														rfp_version INT,
-														rfp_item_no INT,
-														
-														order_serial INT,
-														order_product_no INT,
+CREATE TABLE erp_system.dbo.material_entry_permit_items		(	entry_permit_serial INT REFERENCES material_entry_permits(entry_permit_serial),
+																entry_permit_item_serial INT,
 																
-														contract_serial INT,
-														contract_version INT, 
-														contract_product_no INT,
+																generic_category_id INT,
+																generic_product_id INT,
+																generic_brand_id INT,
+																generic_model_id INT,
+																
+																company_product_id INT,
+																company_brand_id INT,
+																company_model_id INT,
+																
+																product_serial_number VARCHAR(50),
+																
+																quantity INT,
+																
+																item_price MONEY,
+																item_currency INT REFERENCES currencies_type(id),
+																
+																rfp_requestor_team INT,
+																rfp_serial INT,
+																rfp_version INT,
+																rfp_item_no INT,
 																	
-														added_by INT REFERENCES employees_info(employee_id),
+																added_by INT REFERENCES employees_info(employee_id),
+																
+																FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id, generic_model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
+																FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),
+																FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
+																PRIMARY KEY (entry_permit_serial, entry_permit_item_serial)
+															);		
+
+
+																
+CREATE TABLE erp_system.dbo.material_release_permits	(	release_date DATETIME DEFAULT GETDATE(),
 														
-														FOREIGN KEY (transaction_serial, transaction_item_serial) REFERENCES stock(transaction_serial, transaction_item_serial),
-														FOREIGN KEY (contract_serial, contract_version, contract_product_no) REFERENCES maintenance_contracts_products_info(contract_serial, contract_version, product_number),
-														FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
-														FOREIGN KEY (order_serial,order_product_no) REFERENCES work_orders_products_info(order_serial,product_number),
-														PRIMARY KEY (issue_serial, issue_item_serial)
-													);	
+															release_serial INT PRIMARY KEY,
+														
+															material_receiver INT REFERENCES employees_info(employee_id),
+															
+															release_by INT REFERENCES employees_info(employee_id)
+														);
 													
+CREATE TABLE erp_system.dbo.material_release_permit_items	(	release_serial INT REFERENCES material_release_permits(release_serial),
+																release_item_serial INT,
+																
+																entry_permit_serial INT,
+																entry_permit_item_serial INT,
+																
+																quantity INT,
+																
+																rfp_requestor_team INT,
+																rfp_serial INT,
+																rfp_version INT,
+																rfp_item_no INT,
+																
+																order_serial INT,
+																order_product_no INT,
+																	
+																date_added DATETIME DEFAULT GETDATE(),
+																
+																FOREIGN KEY (entry_permit_serial, entry_permit_item_serial) REFERENCES material_entry_permit_items(entry_permit_serial, entry_permit_item_serial),
+																FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
+																FOREIGN KEY (order_serial,order_product_no) REFERENCES work_orders_products_info(order_serial,product_number),
+																PRIMARY KEY (release_serial, release_item_serial)
+															);	
+													
+CREATE TABLE erp_system.dbo.material_reservation		(	reservation_date DATETIME DEFAULT GETDATE(),
+														
+															reservation_serial INT PRIMARY KEY,
+															
+															entry_permit_serial INT,
+															entry_permit_item_serial INT,
+													
+															quantity INT,
+															
+															rfp_requestor_team INT,
+															rfp_serial INT,
+															rfp_version INT,
+															rfp_item_no INT,
+															
+															order_serial INT,
+															order_product_no INT,
+															
+															offer_proposer INT,
+	                                                        offer_serial INT,
+	                                                        offer_version INT, 
+	                                                        offer_product_no INT,
+									
+															reserved_by INT REFERENCES employees_info(employee_id),
+															
+															is_released BIT,
+															is_cancelled BIT,
+
+															hold_unit DATE,
+															
+															FOREIGN KEY (offer_proposer,offer_serial,offer_version,product_number) REFERENCES outgoing_quotations_items(offer_proposer,offer_serial,offer_version,product_number),
+															FOREIGN KEY (entry_permit_serial, entry_permit_item_serial) REFERENCES material_entry_permit_items(entry_permit_serial, entry_permit_item_serial)
+														);
+														
 --PROCUREMENT													
 CREATE TABLE erp_system.dbo.supplier_name			(	supplier_serial INT PRIMARY KEY,
 														supplier_name NVARCHAR(50),
@@ -1770,13 +1818,23 @@ CREATE TABLE erp_system.dbo.supplier_name			(	supplier_serial INT PRIMARY KEY,
 													);
 
 CREATE TABLE erp_system.dbo.supplier_brands			(	supplier_serial INT REFERENCES supplier_name(supplier_serial),
-														category_id INT,
-														product_id INT,
-														brand_id INT,
+														brand_serial INT,
+														
+														generic_category_id INT,
+														generic_product_id INT,
+														generic_brand_id INT,
+														generic_model_id INT,
+														
+														company_product_id INT,
+														company_brand_id INT,
+														company_model_id INT,
+																
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
-														FOREIGN KEY (category_id,product_id, brand_id) REFERENCES generic_products_brand(category_id,product_id, brand_id),
-														PRIMARY KEY (supplier_serial,category_id,product_id, brand_id)
+														
+														FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id, generic_model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
+														FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),
+														PRIMARY KEY (supplier_serial,brand_serial)
 													);
 													
 CREATE TABLE erp_system.dbo.supplier_branches		(	branch_serial INT PRIMARY KEY,
@@ -1873,13 +1931,21 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 															rfp_serial INT,
 															rfp_version INT,
 															item_no INT,
-															category_id INT,
-															product_id INT,
-															brand_id INT,
-															model_id INT,
+															
+															generic_category_id INT,
+															generic_product_id INT,
+															generic_brand_id INT,
+															generic_model_id INT,
+															
+															company_product_id INT,
+															company_brand_id INT,
+															company_model_id INT,
+																
 															added_by INT REFERENCES employees_info(employee_id),
 															date_added DATETIME DEFAULT getdate(),
-															FOREIGN KEY (category_id,product_id, brand_id, model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
+															
+															FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id, generic_model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
+															FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),	
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
 														);
 														
