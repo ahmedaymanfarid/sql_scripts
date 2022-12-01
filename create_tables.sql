@@ -1955,15 +1955,20 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 														);
 
 CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT getdate(),
-													petty_cash_serial INT PRIMARY KEY,
+													settlement_serial INT PRIMARY KEY,
+													
 													rfp_requestor_team INT,
 													rfp_serial INT,
 													rfp_version INT,
 													rfp_item_no INT,
-													supplier_serial INT REFERENCES supplier_name(supplier_serial),
-													brand_id INT REFERENCES generic_brands(brand_id),
+													
+													supplier_serial INT,
+													brand_serial INT,
+													
+													quantity INT,
 													payment_value MONEY,
 													payment_date DATETIME,
+													FOREIGN KEY (supplier_serial,brand_serial) REFERENCES supplier_brands(supplier_serial,brand_serial),
 													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no)
 												);	
 														
