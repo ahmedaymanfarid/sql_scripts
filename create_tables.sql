@@ -740,7 +740,7 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
 															report_status INT REFERENCES erp_system.dbo.approvals_status(id),
 															date_added DATETIME DEFAULT getdate(),
-
+															service_report_type INT REFERENCES erp_system.dbo.service_reports_type(id),
 															FOREIGN KEY (maintenance_contract_serial, maintenance_contract_version, maintenance_contract_product_number, maintenance_contract_model_serial_id) REFERENCES erp_system.dbo.maintenance_contracts_products_serials(contract_serial, contract_version, product_number, serial_id),
 															
 															FOREIGN KEY (work_order_serial, work_order_product_number, work_order_model_serial_id) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id)
@@ -752,6 +752,11 @@ CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_seri
 																	 date_added DATETIME DEFAULT GETDATE(),
 																	 PRIMARY KEY(report_serial, approving_personnel, approval_serial)
 																 );
+																 
+CREATE TABLE erp_system.dbo.service_reports_type    (	id INT PRIMARY KEY,
+														report_type VARCHAR(50),
+														date_added DATETIME DEFAULT getdate()
+													);
 
 														
 CREATE TABLE erp_system.dbo.vacation_leave_requests		(	request_serial INT PRIMARY KEY,
@@ -1948,6 +1953,19 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 															FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),	
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
 														);
+
+CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT getdate(),
+													petty_cash_serial INT PRIMARY KEY,
+													rfp_requestor_team INT,
+													rfp_serial INT,
+													rfp_version INT,
+													rfp_item_no INT,
+													supplier_serial INT REFERENCES supplier_name(supplier_serial),
+													brand_id INT REFERENCES generic_brands(brand_id),
+													payment_value MONEY,
+													payment_date DATETIME,
+													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no)
+												);	
 														
 --SAMEH
 CREATE TABLE erp_system.dbo.incoming_quotations (	issue_date datetime,
@@ -2018,14 +2036,12 @@ CREATE TABLE erp_system.dbo.incoming_quotations_items ( rfp_requestor_team int,
 														price_value money,
 														
 														supplier_serial INT,
-														category_id INT,
-														product_id INT,
-														brand_id INT,
+														brand_serial INT,
 														
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
 													
-														FOREIGN KEY (supplier_serial,category_id,product_id, brand_id) references supplier_brands(supplier_serial,category_id,product_id, brand_id),
+														FOREIGN KEY (supplier_serial, brand_serial) references supplier_brands(supplier_serial, brand_serial),
 														FOREIGN KEY(rfp_requestor_team, rfp_serial, rfp_version, rfp_item_number) REFERENCES rfps_items(rfp_requestor_team, rfp_serial, rfp_version, item_no),
 														PRIMARY KEY(qoutation_serial, quotation_item_number)
 														);
@@ -2087,9 +2103,7 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT R
 																	rfp_item_no INT,
 																	
 																	supplier_serial INT,
-																	category_id INT,
-																	product_id INT,
-																	brand_id INT,
+																	brand_serial INT,
 																	
 																	quantity int,
 																	measure_unit int FOREIGN KEY REFERENCES measure_units(id),
@@ -2098,7 +2112,7 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT R
 																	added_by INT REFERENCES employees_info(employee_id),
 																	date_added DATETIME DEFAULT getdate(),
 																	
-																	FOREIGN KEY (supplier_serial,category_id,product_id, brand_id) references supplier_brands(supplier_serial,category_id,product_id, brand_id),
+																	FOREIGN KEY (supplier_serial, brand_serial) references supplier_brands(supplier_serial, brand_serial),
 																	FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 																	PRIMARY KEY (order_serial,order_item_no)
 																);
