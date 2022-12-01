@@ -1956,6 +1956,7 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 
 CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT getdate(),
 													settlement_serial INT PRIMARY KEY,
+													procurement_officer INT REFERENCES employees_info(employee_id),
 													
 													rfp_requestor_team INT,
 													rfp_serial INT,
@@ -1974,8 +1975,7 @@ CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT g
 													payment_date DATETIME,
 
 													added_by INT REFERENCES employees_info(employee_id),
-													date_added DATETIME DEFAULT getdate(),
-															
+													
 													FOREIGN KEY (supplier_serial,brand_serial) REFERENCES supplier_brands(supplier_serial,brand_serial),
 													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no)
 												);	
