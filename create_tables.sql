@@ -1966,8 +1966,16 @@ CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT g
 													brand_serial INT,
 													
 													quantity INT,
+												    measure_unit INT REFERENCES measure_units(id),
+
 													payment_value MONEY,
+													price_currency int FOREIGN KEY REFERENCES currencies_type(id),
+
 													payment_date DATETIME,
+
+													added_by INT REFERENCES employees_info(employee_id),
+													date_added DATETIME DEFAULT getdate(),
+															
 													FOREIGN KEY (supplier_serial,brand_serial) REFERENCES supplier_brands(supplier_serial,brand_serial),
 													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no)
 												);	
