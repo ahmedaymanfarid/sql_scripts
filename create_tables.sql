@@ -1880,7 +1880,7 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 
 CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT getdate(),
 													settlement_serial INT PRIMARY KEY,
-													procurement_officer INT REFERENCES employees_info(employee_id),
+													custody_employee INT REFERENCES employees_info(employee_id),
 													
 													rfp_requestor_team INT,
 													rfp_serial INT,
@@ -1891,7 +1891,6 @@ CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT g
 													brand_serial INT,
 													
 													quantity INT,
-												    measure_unit INT REFERENCES measure_units(id),
 
 													payment_value MONEY,
 													price_currency int FOREIGN KEY REFERENCES currencies_type(id),
