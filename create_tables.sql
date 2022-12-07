@@ -1869,16 +1869,15 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 															FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),	
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
 														);
-
 CREATE TABLE erp_system.dbo.cash_settlements(	issue_date DATETIME DEFAULT getdate(),
 												settlement_serial INT PRIMARY KEY,
 												
-												added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
-												date_added DATETIME DEFAULT getdate(),
-												
 												custody_of INT REFERENCES erp_system.dbo.employees_info(employee_id),
 												
-												settlement_status INT REFERENCES settlements_status(id)
+												settlement_status INT REFERENCES settlements_status(id),
+
+												added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
+												date_added DATETIME DEFAULT getdate()
 											);	
 
 CREATE TABLE erp_system.dbo.cash_settlements_items(	issue_date DATETIME DEFAULT getdate(),
@@ -1895,7 +1894,6 @@ CREATE TABLE erp_system.dbo.cash_settlements_items(	issue_date DATETIME DEFAULT 
 													brand_serial INT,
 													
 													quantity INT,
-												    measure_unit INT REFERENCES measure_units(id),
 
 													payment_value MONEY,
 													price_currency int FOREIGN KEY REFERENCES currencies_type(id),
@@ -1909,7 +1907,7 @@ CREATE TABLE erp_system.dbo.cash_settlements_items(	issue_date DATETIME DEFAULT 
 													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 													PRIMARY KEY (settlement_serial, product_serial)
 													
-												);			
+												);		
 --PRODUCT SUPPORT		
 CREATE TABLE erp_system.dbo.service_reports_type    (	id INT PRIMARY KEY,
 														report_type VARCHAR(50),
