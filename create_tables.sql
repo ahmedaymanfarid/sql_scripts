@@ -1895,9 +1895,13 @@ CREATE TABLE erp_system.dbo.cash_settlements_items(	issue_date DATETIME DEFAULT 
 													brand_serial INT,
 													
 													quantity INT,
+												    measure_unit INT REFERENCES measure_units(id),
+
 													payment_value MONEY,
+													price_currency int FOREIGN KEY REFERENCES currencies_type(id),
+
 													payment_date DATETIME,
-													
+	
 													added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
 												
 													FOREIGN KEY (supplier_serial,brand_serial) REFERENCES supplier_brands(supplier_serial,brand_serial),
