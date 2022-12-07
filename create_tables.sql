@@ -1903,7 +1903,8 @@ CREATE TABLE erp_system.dbo.cash_settlements_items(	issue_date DATETIME DEFAULT 
 													payment_date DATETIME,
 	
 													added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
-												
+													date_added DATETIME DEFAULT getdate(),
+													
 													FOREIGN KEY (supplier_serial,brand_serial) REFERENCES supplier_brands(supplier_serial,brand_serial),
 													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 													PRIMARY KEY (settlement_serial, product_serial)
