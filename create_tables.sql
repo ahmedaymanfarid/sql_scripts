@@ -62,15 +62,10 @@ CREATE TABLE erp_system.dbo.rfps_status					(	id INT PRIMARY KEY,
 														date_added DATETIME DEFAULT getdate()
 													);							
 
-CREATE TABLE erp_system.dbo.rfps_items_status		(	id INT PRIMARY KEY,
-														rfp_status VARCHAR(50),
+CREATE TABLE erp_system.dbo.settlements_status	(	id INT PRIMARY KEY,
+														settlement_status VARCHAR(50),
 														date_added DATETIME DEFAULT getdate()
 													);
-
-CREATE TABLE erp_system.dbo.rfps_item_availability_status		(	id INT PRIMARY KEY,
-																	availability_status VARCHAR(50),
-																	date_added DATETIME DEFAULT getdate()
-																);
 																
 CREATE TABLE erp_system.dbo.rfps_requestors		(	team_id INT REFERENCES teams_type(id),
 													authorized_personnel INT REFERENCES employees_info(employee_id),
@@ -1752,17 +1747,15 @@ CREATE TABLE erp_system.dbo.supplier_brands			(	supplier_serial INT REFERENCES s
 														generic_category_id INT,
 														generic_product_id INT,
 														generic_brand_id INT,
-														generic_model_id INT,
 														
 														company_product_id INT,
 														company_brand_id INT,
-														company_model_id INT,
 																
 														added_by INT REFERENCES employees_info(employee_id),
 														date_added DATETIME DEFAULT getdate(),
 														
-														FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id, generic_model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
-														FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),
+														FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id) REFERENCES generic_products_brand(category_id,product_id, brand_id),
+														FOREIGN KEY (company_product_id, company_brand_id) REFERENCES products_brands(product_id, brand_id),
 														PRIMARY KEY (supplier_serial,brand_serial)
 													);
 													
@@ -1840,8 +1833,7 @@ CREATE TABLE erp_system.dbo.rfps_items					(	rfp_requestor_team INT,
 															item_quantity INT ,
 															measure_unit INT REFERENCES measure_units(id),
 															item_notes VARCHAR(150),
-															item_status INT REFERENCES rfps_items_status(id),
-															availability_status INT REFERENCES rfps_item_availability_status(id),
+															item_status INT REFERENCES rfps_status(id),
 															date_added DATETIME DEFAULT getdate(),
 															FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version) REFERENCES rfps(rfp_requestor_team,rfp_serial,rfp_version),
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
@@ -1878,8 +1870,21 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
 														);
 
-CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT getdate(),
-													settlement_serial INT PRIMARY KEY,
+CREATE TABLE erp_system.dbo.cash_settlements(	issue_date DATETIME DEFAULT getdate(),
+												settlement_serial INT PRIMARY KEY,
+												
+												added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
+												date_added DATETIME DEFAULT getdate(),
+												
+												custody_of INT REFERENCES erp_system.dbo.employees_info(employee_id),
+												
+												settlement_status INT REFERENCES settlements_status(id)
+											);	
+
+CREATE TABLE erp_system.dbo.cash_settlements_items(	issue_date DATETIME DEFAULT getdate(),
+													
+													settlement_serial INT REFERENCES cash_settlements(settlement_serial),
+													product_serial INT, 
 													
 													rfp_requestor_team INT,
 													rfp_serial INT,
@@ -1892,10 +1897,14 @@ CREATE TABLE erp_system.dbo.petty_cash_settlement(	issue_date DATETIME DEFAULT g
 													quantity INT,
 													payment_value MONEY,
 													payment_date DATETIME,
+													
+													added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
+												
 													FOREIGN KEY (supplier_serial,brand_serial) REFERENCES supplier_brands(supplier_serial,brand_serial),
-													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no)
-												);	
-		
+													FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
+													PRIMARY KEY (settlement_serial, product_serial)
+													
+												);			
 --PRODUCT SUPPORT		
 CREATE TABLE erp_system.dbo.service_reports_type    (	id INT PRIMARY KEY,
 														report_type VARCHAR(50),
