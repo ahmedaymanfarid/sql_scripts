@@ -1732,9 +1732,10 @@ CREATE TABLE erp_system.dbo.material_reservation		(	reservation_date DATETIME DE
 															is_released BIT,
 															is_cancelled BIT,
 
-															hold_unit DATE,
+															hold_until DATE,
 															
-															FOREIGN KEY (offer_proposer,offer_serial,offer_version,product_number) REFERENCES outgoing_quotations_items(offer_proposer,offer_serial,offer_version,product_number),
+															FOREIGN KEY (order_serial,order_product_no) REFERENCES work_orders_products_info(order_serial,product_number),
+															FOREIGN KEY (offer_proposer,offer_serial,offer_version,offer_product_no) REFERENCES outgoing_quotations_items(offer_proposer,offer_serial,offer_version,product_number),
 															FOREIGN KEY (entry_permit_serial, entry_permit_item_serial) REFERENCES material_entry_permit_items(entry_permit_serial, entry_permit_item_serial)
 														);
 														
