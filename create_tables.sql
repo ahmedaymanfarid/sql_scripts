@@ -2078,6 +2078,7 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders	(	issue_date DATETIME DEFAU
 															
 															price_value MONEY,
 															price_currency INT REFERENCES currencies_type(id),
+													        vat_condition int FOREIGN KEY REFERENCES vat_condition(id),
 															
 															percent_down_payment INT,
 															percent_on_delivery INT,
