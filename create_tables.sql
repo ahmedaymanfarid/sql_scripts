@@ -397,15 +397,18 @@ CREATE TABLE erp_system.dbo.employees_info			(	employee_id INT PRIMARY KEY,
 													);
 
 CREATE TABLE erp_system.dbo.employees_contracts		(	employee_id INT REFERENCES employees_info(employee_id),
+														contract_serial INT,
 														contract_type INT REFERENCES employement_contracts_type(id),
+														start_date DATE,
+														end_date DATE,
 														contract_duration INT,
 														contract_duration_unit INT REFERENCES time_units(id),
 														notice_period INT,
 														notice_period_unit INT REFERENCES time_units(id),
 														probation_period INT,
-														probation_period INT REFERENCES time_units(id),
+														probation_period_unit INT REFERENCES time_units(id),
 														date_added DATETIME DEFAULT getdate(),
-														PRIMARY KEY (employee_id)
+														PRIMARY KEY (employee_id, contract_serial)
 													);
 													 
 CREATE TABLE erp_system.dbo.employees_educational_qualifications	(	employee_id INT REFERENCES employees_info(employee_id),
