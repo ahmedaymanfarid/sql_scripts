@@ -1699,12 +1699,27 @@ CREATE TABLE erp_system.dbo.material_release_permit_items	(	release_serial INT R
 																
 																order_serial INT,
 																order_product_no INT,
-																	
+																
+																order_serial INT,
+																project_serial INT,
+																location_id INT,
+																
+																project_serial INT,
+																location_id INT,
+															
+																contract_serial INT,
+																contract_version INT,
+																project_serial INT,
+																location_id INT,
+																		
 																date_added DATETIME DEFAULT GETDATE(),
 																
 																FOREIGN KEY (entry_permit_serial, entry_permit_item_serial) REFERENCES material_entry_permit_items(entry_permit_serial, entry_permit_item_serial),
 																FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 																FOREIGN KEY (order_serial,order_product_no) REFERENCES work_orders_products_info(order_serial,product_number),
+																FOREIGN KEY (order_serial, project_serial, location_id) REFERENCES work_orders_project_locations(order_serial, project_serial, location_id),
+																FOREIGN KEY (contract_serial, contract_version, project_serial, location_id) REFERENCES maintenance_contracts_projects_locations(contract_serial, contract_version, project_serial, location_id),
+																FOREIGN KEY (project_serial,location_id) REFERENCES company_project_locations(project_serial,location_id),
 																PRIMARY KEY (release_serial, release_item_serial)
 															);	
 													
