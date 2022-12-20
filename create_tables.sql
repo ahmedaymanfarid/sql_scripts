@@ -1966,6 +1966,7 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders	(	issue_date DATETIME DEFAU
 															
 															price_value MONEY,
 															price_currency INT REFERENCES currencies_type(id),
+															vat_condition int FOREIGN KEY REFERENCES vat_condition(id),
 															
 															percent_down_payment INT,
 															percent_on_delivery INT,
@@ -1977,6 +1978,8 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders	(	issue_date DATETIME DEFAU
 															delivery_period_minimum INT,
 															delivery_period_maximum INT,
 															delivery_time_unit INT REFERENCES time_units(id),
+															delivery_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+															
 															
 															delivery_point INT REFERENCES delivery_points(id),
 															contract_type INT REFERENCES contracts_type(id),
@@ -2012,6 +2015,7 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT R
 																	brand_serial INT,
 																	
 																	quantity int,
+																	measure_unit int FOREIGN KEY REFERENCES measure_units(id),
 																	price_value money,
 														
 																	notes NVARCHAR(150),
@@ -2141,3 +2145,158 @@ CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_seri
 																	 date_added DATETIME DEFAULT GETDATE(),
 																	 PRIMARY KEY(report_serial, approving_personnel, approval_serial)
 																 );
+<<<<<<< HEAD
+
+			
+--SAMEH
+CREATE TABLE erp_system.dbo.incoming_quotations (	issue_date datetime,
+													
+													rfp_requestor_team int,
+													rfp_serial int,
+													rfp_version int,
+													
+													qoutation_serial int PRIMARY KEY,
+													quotation_id varchar(50),
+													
+													procurement_officer int FOREIGN KEY REFERENCES employees_info(employee_id),
+													
+													supplier_address_serial int,
+													supplier_contact int,
+													
+													
+													price_currency int FOREIGN KEY REFERENCES currencies_type(id),
+													price_value money,
+													vat_condition int FOREIGN KEY REFERENCES vat_condition(id),
+													
+													percent_down_payment int,
+													percent_on_delivery int,
+													percent_payable int,
+													payable_period int,
+													payable_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													payable_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+													
+													delivery_period_min int,
+													delivery_period_max int,
+													delivery_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													delivery_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+													
+													delivery_point int FOREIGN KEY REFERENCES delivery_points(id),
+													
+													contract_type int FOREIGN KEY REFERENCES contracts_type(id),
+													
+													warranty_period int,
+													warranty_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													warranty_period_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+													
+													validity_period int,
+													validity_time_unit int FOREIGN KEY REFERENCES time_units(id),
+													
+													qoutation_status int FOREIGN KEY REFERENCES offers_status(id),
+													
+													notes nvarchar(150),
+													
+													added_by INT REFERENCES employees_info(employee_id),
+													date_added DATETIME DEFAULT getdate(),
+															
+													FOREIGN KEY (rfp_requestor_team, rfp_serial, rfp_version) REFERENCES rfps(rfp_requestor_team, rfp_serial, rfp_version),
+													FOREIGN KEY (supplier_address_serial, supplier_contact) REFERENCES supplier_contact_person_info(branch_serial, contact_id)
+													);
+
+--SAMEH
+CREATE TABLE erp_system.dbo.incoming_quotations_items ( rfp_requestor_team int,
+														rfp_serial int,
+														rfp_version int,
+														
+														rfp_item_number int,
+														
+														qoutation_serial int REFERENCES incoming_quotations(qoutation_serial),
+														quotation_item_number int,
+														
+														quantity int,
+														measure_unit int FOREIGN KEY REFERENCES measure_units(id),
+														price_value money,
+														
+														supplier_serial INT,
+														brand_serial INT,
+														
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate(),
+													
+														FOREIGN KEY (supplier_serial, brand_serial) references supplier_brands(supplier_serial, brand_serial),
+														FOREIGN KEY(rfp_requestor_team, rfp_serial, rfp_version, rfp_item_number) REFERENCES rfps_items(rfp_requestor_team, rfp_serial, rfp_version, item_no),
+														PRIMARY KEY(qoutation_serial, quotation_item_number)
+														);
+														
+
+														
+CREATE TABLE erp_system.dbo.outgoing_purchase_orders	(	issue_date DATETIME DEFAULT getdate(),											
+
+															order_serial INT PRIMARY KEY,
+															order_id VARCHAR(50),
+															
+															procurement_officer int FOREIGN KEY REFERENCES employees_info(employee_id),
+															
+															supplier_address_serial INT,
+															supplier_contact INT,
+															
+															price_value MONEY,
+															price_currency INT REFERENCES currencies_type(id),
+													        vat_condition int FOREIGN KEY REFERENCES vat_condition(id),
+															
+															percent_down_payment INT,
+															percent_on_delivery INT,
+															percent_payable int,
+															payable_period int,
+															payable_time_unit int FOREIGN KEY REFERENCES time_units(id),
+															payable_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+															
+															isDrawing BIT,
+															
+															delivery_period_minimum INT,
+															delivery_period_maximum INT,
+															delivery_time_unit INT REFERENCES time_units(id),
+															
+															delivery_point INT REFERENCES delivery_points(id),
+															contract_type INT REFERENCES contracts_type(id),
+															
+															warranty_period INT,
+															warranty_time_unit INT REFERENCES time_units(id),
+															warranty_time_condition int FOREIGN KEY REFERENCES condition_start_dates(id),
+															
+															delivered BIT,
+															documents_received BIT,
+															payment_done BIT,
+															invoice_received BIT,
+															
+															order_notes VARCHAR(150),
+															
+															added_by INT REFERENCES employees_info(employee_id),
+															date_added DATETIME DEFAULT getdate(),
+															
+															FOREIGN KEY (supplier_address_serial, supplier_contact) REFERENCES supplier_contact_person_info(branch_serial, contact_id),
+														);														
+														
+CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT REFERENCES outgoing_purchase_orders(order_serial),
+																	order_item_no INT,
+																	
+																	rfp_requestor_team INT,
+																	rfp_serial INT,
+																	rfp_version INT,
+																	rfp_item_no INT,
+																	
+																	supplier_serial INT,
+																	brand_serial INT,
+																	
+																	quantity int,
+																	measure_unit int FOREIGN KEY REFERENCES measure_units(id),
+																	price_value money,
+														
+																	added_by INT REFERENCES employees_info(employee_id),
+																	date_added DATETIME DEFAULT getdate(),
+																	
+																	FOREIGN KEY (supplier_serial, brand_serial) references supplier_brands(supplier_serial, brand_serial),
+																	FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
+																	PRIMARY KEY (order_serial,order_item_no)
+																);
+=======
+>>>>>>> d90e2dd030d115c760ece04cb26b394c6f78c36b
