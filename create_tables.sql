@@ -2098,16 +2098,18 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 
 															mission_serial INT REFERENCES erp_system.dbo.missions(mission_serial),
 
-															wo_serial INT,
-															wo_prod_id INT,
-															wo_prod_serial INT,
+															release_serial INT,
+															release_item_serial INT,
 
 															mc_serial INT,
 															mc_version INT,
 															mc_prod_id INT,
 															mc_prod_serial INT,
 
-															branch_serial INT REFERENCES erp_system.dbo.company_address(address_serial),
+															sales_person INT,
+															branch_serial INT,
+															contact_person INT,
+
 															employee_id INT REFERENCES erp_system.dbo.employees_info(employee_id),
 															
 															reason_of_report INT REFERENCES erp_system.dbo.missions_types(id),
@@ -2155,8 +2157,8 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															FOREIGN KEY (mc_serial, mc_version, mc_prod_id) REFERENCES erp_system.dbo.maintenance_contracts_products_info(contract_serial, contract_version, product_number),
 															FOREIGN KEY (mc_serial, mc_version, mc_prod_id, mc_prod_serial) REFERENCES erp_system.dbo.maintenance_contracts_products_serials(contract_serial, contract_version, product_number, serial_id),
 															
-															FOREIGN KEY (wo_serial, wo_prod_id) REFERENCES work_orders_products_info(order_serial,product_number)
-															--FOREIGN KEY (release_serial, release_item_serial) REFERENCES rea
+															FOREIGN KEY (sales_person, branch_serial, contact_person) REFERENCES contact_person_info(sales_person_id,branch_serial,contact_id),
+															FOREIGN KEY (release_serial, release_item_serial) REFERENCES material_release_permit_items(release_serial, release_item_serial)
 														);
 CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_serial INT REFERENCES service_reports,
 																     approving_personnel INT REFERENCES employees_info,
