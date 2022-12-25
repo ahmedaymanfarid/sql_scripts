@@ -2098,14 +2098,14 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 
 															mission_serial INT REFERENCES erp_system.dbo.missions(mission_serial),
 
-															work_order_serial INT,
-															work_order_product_number INT,
-															work_order_model_serial_id INT,
+															wo_serial INT,
+															wo_prod_id INT,
+															wo_prod_serial INT,
 
-															maintenance_contract_serial INT,
-															maintenance_contract_version INT,
-															maintenance_contract_product_number INT,
-															maintenance_contract_model_serial_id INT,
+															mc_serial INT,
+															mc_version INT,
+															mc_prod_id INT,
+															mc_prod_serial INT,
 
 															branch_serial INT REFERENCES erp_system.dbo.company_address(address_serial),
 															employee_id INT REFERENCES erp_system.dbo.employees_info(employee_id),
@@ -2145,13 +2145,18 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 
 															report_notes NVARCHAR(1000),
 
-															added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
 															report_status INT REFERENCES erp_system.dbo.approvals_status(id),
-															date_added DATETIME DEFAULT getdate(),
 															service_report_type INT REFERENCES erp_system.dbo.service_reports_type(id),
-															FOREIGN KEY (maintenance_contract_serial, maintenance_contract_version, maintenance_contract_product_number, maintenance_contract_model_serial_id) REFERENCES erp_system.dbo.maintenance_contracts_products_serials(contract_serial, contract_version, product_number, serial_id),
+
+															added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
 															
-															FOREIGN KEY (work_order_serial, work_order_product_number, work_order_model_serial_id) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id)
+															date_added DATETIME DEFAULT getdate(),
+															
+															FOREIGN KEY (mc_serial, mc_version, mc_prod_id) REFERENCES erp_system.dbo.maintenance_contracts_products_info(contract_serial, contract_version, product_number),
+															FOREIGN KEY (mc_serial, mc_version, mc_prod_id, mc_prod_serial) REFERENCES erp_system.dbo.maintenance_contracts_products_serials(contract_serial, contract_version, product_number, serial_id),
+															
+															FOREIGN KEY (wo_serial, wo_prod_id) REFERENCES work_orders_products_info(order_serial,product_number)
+															--FOREIGN KEY (release_serial, release_item_serial) REFERENCES rea
 														);
 CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_serial INT REFERENCES service_reports,
 																     approving_personnel INT REFERENCES employees_info,
