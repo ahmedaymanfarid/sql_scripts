@@ -2160,8 +2160,6 @@ CREATE TABLE erp_system.dbo.service_reports_approvals_rejections (   report_seri
 																	 date_added DATETIME DEFAULT GETDATE(),
 																	 PRIMARY KEY(report_serial, approving_personnel, approval_serial)
 																 );
-<<<<<<< HEAD
-
 			
 --SAMEH
 CREATE TABLE erp_system.dbo.incoming_quotations (	issue_date datetime,
@@ -2313,5 +2311,3 @@ CREATE TABLE erp_system.dbo.outgoing_purchase_orders_items		(	order_serial INT R
 																	FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 																	PRIMARY KEY (order_serial,order_item_no)
 																);
-=======
->>>>>>> d90e2dd030d115c760ece04cb26b394c6f78c36b
