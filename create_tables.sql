@@ -235,6 +235,7 @@ CREATE TABLE erp_system.dbo.brands_models			(	product_id INT,
 														model_id INT,
 														brand_model VARCHAR(50),
 														date_added DATETIME DEFAULT getdate(),
+														has_serial_number BIT,
 														FOREIGN KEY (product_id,brand_id) REFERENCES products_brands(product_id,brand_id),
 														PRIMARY KEY (product_id,brand_id,model_id)
 													);
