@@ -1892,6 +1892,7 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 															
 															FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id, generic_model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
 															FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),	
+															FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
 														);
 														
