@@ -2102,6 +2102,10 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 
 															release_serial INT,
 															release_item_serial INT,
+															
+															wo_serial INT,
+															wo_prod_id INT,
+															wo_prod_serial INT,
 
 															mc_serial INT,
 															mc_version INT,
@@ -2189,7 +2193,7 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															--GENSET LOAD TEST
 															genset_control_module NVARCHAR(300),
 
-															genset_load_test_sudden_load_at_80 BIT,
+															genset_load_test_sudden_load_at_60 BIT,
 															genset_load_test_oil_press BIT,
 															genset_load_test_coolant_temp BIT,
 															genset_load_test_emergency_stop BIT,
@@ -2262,6 +2266,10 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															
 															date_added DATETIME DEFAULT getdate(),
 															
+															
+															FOREIGN KEY (wo_serial, wo_prod_id) REFERENCES erp_system.dbo.work_orders_products_info(order_serial, product_number),
+															FOREIGN KEY (wo_serial, wo_prod_id, wo_prod_serial) REFERENCES erp_system.dbo.work_orders_products_serials(order_serial, product_number, serial_id),
+
 															FOREIGN KEY (mc_serial, mc_version, mc_prod_id) REFERENCES erp_system.dbo.maintenance_contracts_products_info(contract_serial, contract_version, product_number),
 															FOREIGN KEY (mc_serial, mc_version, mc_prod_id, mc_prod_serial) REFERENCES erp_system.dbo.maintenance_contracts_products_serials(contract_serial, contract_version, product_number, serial_id),
 															
