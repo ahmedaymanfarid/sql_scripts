@@ -2116,8 +2116,6 @@ CREATE TABLE erp_system.dbo.service_reports				(	report_serial INT PRIMARY KEY,
 															branch_serial INT,
 															contact_person INT,
 
-															employee_id INT REFERENCES erp_system.dbo.employees_info(employee_id),
-															
 															reason_of_report INT REFERENCES erp_system.dbo.missions_types(id),
 															
 															--UPS GENERAL REPORT
@@ -2296,6 +2294,13 @@ CREATE TABLE erp_system.dbo.inspection_service_reports	(	report_serial INT REFER
 														    date_added DATETIME DEFAULT GETDATE(),
 														    PRIMARY KEY(report_serial, problem_serial, spare_part_serial)
 														);
+													
+CREATE TABLE erp_system.dbo.service_reports_submitters(	report_serial INT REFERENCES service_reports(report_serial),
+														submitter_id INT REFERENCES employees_info(employee_id),
+														added_by INT REFERENCES employees_info(employee_id),
+														date_added DATETIME DEFAULT getdate(),
+														PRIMARY KEY (report_serial, submitter_id)
+													  );	
 --SAMEH
 CREATE TABLE erp_system.dbo.incoming_quotations (	issue_date datetime,
 													
