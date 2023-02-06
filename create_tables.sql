@@ -1650,9 +1650,11 @@ CREATE TABLE erp_system.dbo.material_entry_permit_items		(	entry_permit_serial I
 																generic_brand_id INT,
 																generic_model_id INT,
 																
+																company_category_id INT,
 																company_product_id INT,
 																company_brand_id INT,
 																company_model_id INT,
+																company_model_specs INT,
 																
 																product_serial_number VARCHAR(50),
 																
@@ -1669,7 +1671,7 @@ CREATE TABLE erp_system.dbo.material_entry_permit_items		(	entry_permit_serial I
 																added_by INT REFERENCES employees_info(employee_id),
 																
 																FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id, generic_model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
-																FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),
+																FOREIGN KEY (company_category_id, company_product_id, company_brand_id, company_model_id, company_model_specs) REFERENCES erp_system.dbo.model_specs(category_id, product_id, brand_id, model_id, spec_id),
 																FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,rfp_item_no) REFERENCES rfps_items_mapping(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 																PRIMARY KEY (entry_permit_serial, entry_permit_item_serial)
 															);		
@@ -1883,15 +1885,17 @@ CREATE TABLE erp_system.dbo.rfps_items_mapping			(	rfp_requestor_team INT,
 															generic_brand_id INT,
 															generic_model_id INT,
 															
+															company_category_id INT,
 															company_product_id INT,
 															company_brand_id INT,
 															company_model_id INT,
+															company_model_specs INT,
 																
 															added_by INT REFERENCES employees_info(employee_id),
 															date_added DATETIME DEFAULT getdate(),
 															
 															FOREIGN KEY (generic_category_id, generic_product_id, generic_brand_id, generic_model_id) REFERENCES generic_products_model(category_id,product_id, brand_id, model_id),
-															FOREIGN KEY (company_product_id, company_brand_id, company_model_id) REFERENCES brands_models(product_id, brand_id, model_id),	
+															FOREIGN KEY (company_category_id, company_product_id, company_brand_id, company_model_id, company_model_specs)  REFERENCES model_specs(category_id, product_id, brand_id, model_id, spec_id),	
 															FOREIGN KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no) REFERENCES rfps_items(rfp_requestor_team,rfp_serial,rfp_version,item_no),
 															PRIMARY KEY (rfp_requestor_team,rfp_serial,rfp_version,item_no)
 														);
