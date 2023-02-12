@@ -78,7 +78,18 @@ CREATE TABLE erp_system.dbo.rfps_requestors		(	team_id INT REFERENCES teams_type
 													is_valid BIT,
 													date_added DATETIME DEFAULT getdate(),
 													PRIMARY KEY (team_id, authorized_personnel)
-												);																
+												);		
+													
+CREATE TABLE erp_system.dbo.rfps_approvers		(	team_id INT REFERENCES teams_type(id),
+													authorized_personnel INT REFERENCES employees_info(employee_id),
+													approver_team VARCHAR(50),
+													project_serial INT,
+													project_site_id INT,
+													is_valid BIT,
+													date_added DATETIME DEFAULT getdate(),
+													FOREIGN KEY (project_serial, project_site_id) REFERENCES company_project_locations(project_serial, location_id),
+													PRIMARY KEY (team_id, authorized_personnel)
+												);															
 																
 CREATE TABLE erp_system.dbo.measure_units			(	id INT PRIMARY KEY,
 														measure_unit VARCHAR(50),
