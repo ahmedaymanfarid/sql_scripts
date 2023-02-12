@@ -1735,7 +1735,16 @@ CREATE TABLE erp_system.dbo.material_release_permit_items	(	release_serial INT R
 																FOREIGN KEY (contract_serial, contract_version, contract_project_serial, contract_location_id) REFERENCES maintenance_contracts_projects_locations(contract_serial, contract_version, project_serial, location_id),
 																FOREIGN KEY (company_project_serial, company_project_location_id) REFERENCES company_project_locations(project_serial,location_id),
 																PRIMARY KEY (release_serial, release_item_serial)
-															);	
+															);																		
+													
+CREATE TABLE erp_system.dbo.employees_custody	(	employee_id INT REFERENCES employees_info(employee_id),
+													release_serial INT,
+													release_item_serial INT,
+													is_valid BIT,
+													date_added DATETIME DEFAULT getdate(),
+													FOREIGN KEY (release_serial, release_item_serial) REFERENCES material_release_permit_items(release_serial, release_item_serial),
+													PRIMARY KEY (employee_id, release_serial, release_item_serial)
+												);	
 													
 CREATE TABLE erp_system.dbo.material_reservation		(	reservation_date DATETIME DEFAULT GETDATE(),
 														
