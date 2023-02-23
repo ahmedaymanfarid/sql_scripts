@@ -1689,7 +1689,10 @@ CREATE TABLE erp_system.dbo.material_entry_permit_items		(	entry_permit_serial I
 															);		
 
 
-CREATE TABLE erp_system.dbo.material_release_permits_status( release_permit_status_id INT PRIMARY KEY,														     release_permit_status VARCHAR(50),														     date_added DATETIME DEFAULT getdate()														   );
+CREATE TABLE erp_system.dbo.material_release_permits_status( release_permit_status_id INT PRIMARY KEY,
+														     release_permit_status VARCHAR(50),
+														     date_added DATETIME DEFAULT getdate()
+														   );
 																
 CREATE TABLE erp_system.dbo.material_release_permits	(	release_date DATETIME DEFAULT GETDATE(),
 														
@@ -1755,10 +1758,12 @@ CREATE TABLE erp_system.dbo.material_release_permit_items	(	release_serial INT R
 CREATE TABLE erp_system.dbo.material_re_entry_permits  (	
 															re_entry_date DATETIME DEFAULT GETDATE(),														
 															re_entry_permit_serial INT PRIMARY KEY,
-															
-															release_serial INT REFERENCES erp_system.dbo.material_release_permits(release_serial),
+															re_entry_permit_id varchar(50),
 															added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
-															date_added DATETIME DEFAULT getdate()														);CREATE TABLE erp_system.dbo.material_re_entry_permit_items  (	
+															date_added DATETIME DEFAULT getdate()
+														);
+
+CREATE TABLE erp_system.dbo.material_re_entry_permit_items  (	
 																re_entry_permit_serial INT REFERENCES erp_system.dbo.material_re_entry_permits(re_entry_permit_serial),
 																re_entry_permit_item_serial INT,
 															
@@ -1766,7 +1771,11 @@ CREATE TABLE erp_system.dbo.material_re_entry_permits  (
 																release_item_serial INT,
 
 																added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
-																date_added DATETIME DEFAULT getdate(),																FOREIGN KEY (release_serial, release_item_serial) REFERENCES erp_system.dbo.material_release_permit_items(release_serial, release_item_serial), 																PRIMARY KEY(re_entry_permit_serial, re_entry_permit_item_serial)														    );
+																date_added DATETIME DEFAULT getdate(),
+
+																FOREIGN KEY (release_serial, release_item_serial) REFERENCES erp_system.dbo.material_release_permit_items(release_serial, release_item_serial), 
+																PRIMARY KEY(re_entry_permit_serial, re_entry_permit_item_serial)
+														    );
 															
 													
 CREATE TABLE erp_system.dbo.employees_custody	(	employee_id INT REFERENCES employees_info(employee_id),
