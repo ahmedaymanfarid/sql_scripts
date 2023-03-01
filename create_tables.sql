@@ -1776,6 +1776,29 @@ CREATE TABLE erp_system.dbo.material_re_entry_permit_items  (
 																FOREIGN KEY (release_serial, release_item_serial) REFERENCES erp_system.dbo.material_release_permit_items(release_serial, release_item_serial), 
 																PRIMARY KEY(re_entry_permit_serial, re_entry_permit_item_serial)
 														    );
+
+CREATE TABLE erp_system.dbo.material_recieval_notes  (	
+															recieval_note_date DATETIME DEFAULT GETDATE(),														
+															recieval_note_serial INT PRIMARY KEY,
+															recieval_note_id varchar(50),
+															added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
+															date_added DATETIME DEFAULT getdate()
+														);
+
+CREATE TABLE erp_system.dbo.material_recieval_note_items  (	
+																recieval_note_serial INT REFERENCES erp_system.dbo.material_recieval_notes(recieval_note_serial),
+																recieval_note_item_serial INT,
+															
+																release_serial INT,
+																release_item_serial INT,
+
+																added_by INT REFERENCES erp_system.dbo.employees_info(employee_id),
+																date_added DATETIME DEFAULT getdate(),
+
+																FOREIGN KEY (release_serial, release_item_serial) REFERENCES erp_system.dbo.material_release_permit_items(release_serial, release_item_serial), 
+																PRIMARY KEY(recieval_note_serial, recieval_note_item_serial)
+														    );
+															
 															
 													
 CREATE TABLE erp_system.dbo.employees_custody	(	employee_id INT REFERENCES employees_info(employee_id),
