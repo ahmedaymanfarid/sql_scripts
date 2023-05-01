@@ -353,6 +353,62 @@ CREATE TABLE erp_system.dbo.model_specs	(	date_added datetime default getdate(),
 											PRIMARY KEY(category_id, product_id, brand_id, model_id, spec_id)
 										);
 
+CREATE TABLE erp_system.dbo.price_lists		(	date_added DATETIME DEFAULT GETDATE(),
+												added_by INT REFERENCES employees_info(employee_id),
+												list_serial INT PRIMARY KEY,
+												list_id VARCHAR(50)
+											);	
+											
+CREATE TABLE erp_system.dbo.price_list_items	(	date_added DATETIME DEFAULT GETDATE(),
+													added_by INT REFERENCES employees_info(employee_id),
+													
+													list_serial INT REFERENCES price_lists(list_serial),
+													item_serial INT,
+													
+													item_category INT,
+													item_type INT,
+													item_brand INT,
+													item_model INT,
+													item_specs INT,
+													
+													item_price MONEY,
+													item_discount DECIMAL,
+													item_currency INT REFERENCES currencies_type(id),
+													
+													PRIMARY KEY (list_serial, item_serial),
+													FOREIGN KEY (item_category, item_type, item_brand, item_model, item_specs) REFERENCES erp_system.dbo.model_specs(category_id, product_id, brand_id, model_id, spec_id)
+												);				
+
+CREATE TABLE erp_system.dbo.sales_transaction	(	date_added DATETIME DEFAULT GETDATE(),
+													added_by INT REFERENCES employees_info(employee_id),
+													
+													sales_person INT,
+													transaction_serial INT,
+													
+													transaction_id VARCHAR(50),
+													
+													branch_serial INT,
+													contact_id INT,
+													
+													FOREIGN KEY (sales_person,branch_serial,contact_id) REFERENCES contact_person_info(sales_person_id,branch_serial,contact_id),
+													PRIMARY KEY (sales_person, transaction_serial)
+												);
+												
+CREATE TABLE erp_system.dbo.sales_transaction_items	(	date_added DATETIME DEFAULT GETDATE(),
+														added_by INT REFERENCES employees_info(employee_id),
+													
+														sales_person INT,
+														transaction_serial INT,
+														item_serial INT,
+														
+														price_list_serial INT,
+														price_list_item_serial INT,
+														
+														FOREIGN KEY (price_list_serial, price_list_item_serial) REFERENCES price_list_items(list_serial, item_serial),
+														PRIMARY KEY (sales_person, transaction_serial, item_serial)
+													);												
+												
+													
 --WORLD MAP
 CREATE TABLE erp_system.dbo.countries				(	id INT PRIMARY KEY,
 														country VARCHAR(50),
@@ -652,7 +708,10 @@ CREATE TABLE erp_system.dbo.missions					(	mission_serial INT PRIMARY KEY,
 															mission_type INT REFERENCES missions_types(id),
 
 															work_order INT REFERENCES work_orders(order_serial),
+															
 															maintenance_contract INT,
+															maintenance_contract_version INT,
+
 															rfp_requestor INT,
 															rfp_serial INT,
 															rfp_version INT,
@@ -678,7 +737,6 @@ CREATE TABLE erp_system.dbo.missions					(	mission_serial INT PRIMARY KEY,
 															mission_status INT REFERENCES approvals_status(id),
 															comments VARCHAR(150),
 															date_added DATETIME DEFAULT getdate(),
-															maintenance_contract_version INT,
 
 															FOREIGN KEY (maintenance_contract,maintenance_contract_version) REFERENCES maintenance_contracts(contract_serial, contract_version),
 															
@@ -842,7 +900,7 @@ CREATE TABLE erp_system.dbo.company_telephone				(	branch_serial INT REFERENCES 
 													);
 
 --CONTACT PERSONS											
-CREATE TABLE erp_system.dbo.contact_person_info		(		sales_person_id INT REFERENCES employees_info(employee_id),
+CREATE TABLE erp_system.dbo.contact_person_info		(	sales_person_id INT REFERENCES employees_info(employee_id),
 														branch_serial INT REFERENCES company_address(address_serial),
 														contact_id INT,
 														email VARCHAR(50),

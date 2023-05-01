@@ -113,22 +113,11 @@ CREATE FUNCTION dbo.employee_salary_due(@start_date DATETIME, @end_date DATETIME
 RETURNS TABLE AS
 RETURN
 
-WITH get_max_year AS (SELECT employees_basic_salaries.employee_id,
-									max(employees_basic_salaries.due_year) AS due_year
-
-							FROM erp_system.dbo.employees_basic_salaries
-							WHERE employees_basic_salaries.due_year <= DATEPART(YEAR,@start_date)
-							GROUP BY employee_id),
-
-get_latest_salary AS (SELECT employees_basic_salaries.employee_id,
-							max(employees_basic_salaries.due_month) AS due_month,
-							employees_basic_salaries.due_year
+WITH get_latest_salary AS (SELECT employees_basic_salaries.employee_id,
+							MAX(employees_basic_salaries.due_date) AS due_date
 					FROM erp_system.dbo.employees_basic_salaries
-					INNER JOIN get_max_year
-					ON employees_basic_salaries.employee_id = get_max_year.employee_id
-					AND employees_basic_salaries.due_year = get_max_year.due_year
-					WHERE employees_basic_salaries.due_month <= DATEPART(MONTH,@start_date)
-					GROUP BY employees_basic_salaries.employee_id, employees_basic_salaries.due_year)
+					WHERE employees_basic_salaries.due_date <= @end_date
+					GROUP BY employees_basic_salaries.employee_id)
 
 SELECT employees_basic_salaries.employee_id,
 		CASE WHEN (employees_info.is_rejoined = 0 AND employees_info.join_date > @start_date AND employees_info.join_date < @end_date)
@@ -182,14 +171,14 @@ ON employees_info.employee_id = employees_basic_salaries.employee_id
 
 INNER JOIN get_latest_salary
 ON employees_basic_salaries.employee_id = get_latest_salary.employee_id
-AND employees_basic_salaries.due_year = get_latest_salary.due_year
-AND employees_basic_salaries.due_month = get_latest_salary.due_month
+AND employees_basic_salaries.due_date = get_latest_salary.due_date
 
 LEFT JOIN erp_system.dbo.employees_termination_info
 ON employees_info.employee_id = employees_termination_info.id
 
 WHERE (employees_info.enrollement_status < 4 OR 
 employees_termination_info.resignation_date >= @start_date)
+
 
 --GENERATE SALARIES
 CREATE FUNCTION dbo.generate_salaries(@start_date DATETIME, @end_date DATETIME)
@@ -304,11 +293,11 @@ INNER JOIN erp_system.dbo.employees_excluded_attendance
 ON absence_summary.employee_id = employees_excluded_attendance.employee_id
 
 
---EMPLOYEE VACATIONS DAYS COUNT
-CREATE FUNCTION dbo.get_vacations_day_count(@start_date DATETIME, @end_date DATETIME)
+--EMPLOYEE REGULAR VACATIONS DAYS COUNT
+CREATE FUNCTION dbo.get_regular_vacations_amount(@start_date DATETIME, @end_date DATETIME)
 RETURNS TABLE AS
 RETURN
-SELECT vacation_leave_requests.benficiary_persONnel,
+SELECT vacation_leave_requests.benficiary_personnel,
 		CASE WHEN DATEPART(YEAR, vacation_leave_requests.leave_end_date) > DATEPART(YEAR, GETDATE()) 
 		THEN DATEDIFF(DAY, vacation_leave_requests.leave_start_date, DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1)) + 1
 		ELSE DATEDIFF(DAY, vacation_leave_requests.leave_start_date, vacation_leave_requests.leave_end_date) + 1
@@ -318,19 +307,48 @@ FROM erp_system.dbo.vacation_leave_requests
 WHERE vacation_leave_requests.leave_start_date >= @start_date
 AND vacation_leave_requests.leave_start_date <= @end_date
 AND vacation_leave_requests.request_status = 4
-AND (vacation_leave_requests.request_type = 1 OR vacation_leave_requests.request_type = 6 OR vacation_leave_requests.request_type = 7)
+AND vacation_leave_requests.request_type = 1
+--AND (vacation_leave_requests.request_type = 1 OR vacation_leave_requests.request_type = 6 OR vacation_leave_requests.request_type = 7)
 
 
---EMPLOYEE TOTAL VACATIONS COUNT
-CREATE FUNCTION dbo.get_total_vacatiONs_count(@start_date DATETIME, @end_date DATETIME)
+--EMPLOYEE REGULAR VACATIONS COUNT
+CREATE FUNCTION dbo.get_emergency_vacations_count(@start_date DATETIME, @end_date DATETIME)
 RETURNS TABLE AS
 RETURN
-SELECT get_vacatiONs_day_count.benficiary_persONnel,
-		SUM(get_vacatiONs_day_count.vacation_days) AS vacation_days
+SELECT get_emergency_vacations_amount.benficiary_personnel,
+		SUM(get_emergency_vacations_amount.vacation_days) AS vacation_days
 
-FROM erp_system.dbo.get_vacatiONs_day_count(@start_date,@end_date)
-GROUP BY get_vacatiONs_day_count.benficiary_persONnel
+FROM erp_system.dbo.get_emergency_vacations_amount(@start_date,@end_date)
+GROUP BY get_emergency_vacations_amount.benficiary_personnel
 
+--EMPLOYEE EMERGENCY VACATIONS DAYS COUNT
+CREATE FUNCTION dbo.get_emergency_vacations_amount(@start_date DATETIME, @end_date DATETIME)
+RETURNS TABLE AS
+RETURN
+SELECT vacation_leave_requests.benficiary_personnel,
+		CASE WHEN DATEPART(YEAR, vacation_leave_requests.leave_end_date) > DATEPART(YEAR, GETDATE()) 
+		THEN DATEDIFF(DAY, vacation_leave_requests.leave_start_date, DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1)) + 1
+		ELSE DATEDIFF(DAY, vacation_leave_requests.leave_start_date, vacation_leave_requests.leave_end_date) + 1
+		END AS vacation_days
+
+FROM erp_system.dbo.vacation_leave_requests
+WHERE vacation_leave_requests.leave_start_date >= @start_date
+AND vacation_leave_requests.leave_start_date <= @end_date
+AND vacation_leave_requests.request_status = 4
+AND (vacation_leave_requests.request_type = 6 
+OR vacation_leave_requests.request_type = 7)
+--AND (vacation_leave_requests.request_type = 1 OR vacation_leave_requests.request_type = 6 OR vacation_leave_requests.request_type = 7)
+
+
+--EMPLOYEE REGULAR VACATIONS COUNT
+CREATE FUNCTION dbo.get_emergency_vacations_count(@start_date DATETIME, @end_date DATETIME)
+RETURNS TABLE AS
+RETURN
+SELECT get_emergency_vacations_amount.benficiary_personnel,
+		SUM(get_emergency_vacations_amount.vacation_days) AS vacation_days
+
+FROM erp_system.dbo.get_emergency_vacations_amount(@start_date,@end_date)
+GROUP BY get_emergency_vacations_amount.benficiary_personnel
 
 --EMPLOYEMENT STATUS REPORT
 CREATE FUNCTION dbo.get_employement_status_report()

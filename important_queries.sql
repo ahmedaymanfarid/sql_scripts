@@ -348,6 +348,19 @@ inner join erp_system.dbo.enrollement_status
 on employees_info.enrollement_status = enrollement_status.id
 order by employees_info.employee_id
 
+--SOFTWARE TEAM SALARIES
+OPEN SYMMETRIC KEY salary_key
+DECRYPTION BY PASSWORD = '#01$elec@salary';
+
+select employees_info.employee_id,
+		employees_info.name,
+	employees_monthly_salaries.due_year,
+	employees_monthly_salaries.due_month,
+	CAST(CONVERT(VARCHAR, DECRYPTBYKEY(employees_monthly_salaries.salary_due)) AS MONEY) as salary
+from erp_system.dbo.employees_monthly_salaries
+inner join erp_system.dbo.employees_info
+on employees_monthly_salaries.employee_id = employees_info.employee_id
+where employees_info.employee_department = 110
 
 --PRODUCTS FULL INFO
 select distinct products_category.id,

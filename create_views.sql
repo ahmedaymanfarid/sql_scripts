@@ -205,13 +205,24 @@ group by emp_code, name, modified_date;
 
 
 --GET EMPLOYEE VACATION LIMIT
-CREATE VIEW employee_vacation_limit AS
+CREATE VIEW regular_vacation_limit AS
 SELECT
 		employees_info.employee_id,
-		CASE WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 7 THEN 15
-		WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 10 THEN 21
-		WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 15 THEN 30
-		ELSE 45 END AS vacation_limit,
+		CASE WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 7 THEN 10
+		WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 10 THEN 16
+		WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 15 THEN 25
+		ELSE 40 END AS vacation_limit,
+		employees_info.name
+
+FROM erp_system.dbo.employees_info
+
+CREATE VIEW emergency_vacation_limit AS
+SELECT
+		employees_info.employee_id,
+		CASE WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 7 THEN 5
+		WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 10 THEN 5
+		WHEN DATEPART(YEAR,GETDATE()) - DATEPART(YEAR,employees_info.join_date) < 15 THEN 5
+		ELSE 5 END AS vacation_limit,
 		employees_info.name
 
 FROM erp_system.dbo.employees_info
