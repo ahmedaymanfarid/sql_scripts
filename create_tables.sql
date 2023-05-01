@@ -405,6 +405,7 @@ CREATE TABLE erp_system.dbo.sales_transaction_items	(	date_added DATETIME DEFAUL
 														price_list_item_serial INT,
 														
 														FOREIGN KEY (price_list_serial, price_list_item_serial) REFERENCES price_list_items(list_serial, item_serial),
+														FOREIGN KEY (sales_person, transaction_serial) REFERENCES sales_transaction(sales_person, transaction_serial),
 														PRIMARY KEY (sales_person, transaction_serial, item_serial)
 													);												
 												
