@@ -141,15 +141,20 @@ CREATE FUNCTION dbo.get_sales_ordered_amount(@start_date DATETIME, @end_date DAT
 RETURNS TABLE AS
 RETURN
 select work_orders.sales_person,
-		work_orders.order_status,
+		orders_status.order_status,
 		sum(work_orders.price_value) as ordered_amount,
+		currencies_type.currency,
 		employees_initials.employee_initial
 from erp_system.dbo.work_orders
 inner join erp_system.dbo.employees_initials
 on work_orders.sales_person = employees_initials.id
+inner join erp_system.dbo.currencies_type
+on work_orders.price_currency = currencies_type.id
+inner join erp_system.dbo.orders_status
+on work_orders.order_status = orders_status.id
 where work_orders.issue_date >= @start_date
 and work_orders.issue_date <= @end_date
-group by sales_person, employees_initials.employee_initial, order_status
+group by sales_person, employees_initials.employee_initial, orders_status.order_status, currency
 
 CREATE FUNCTION dbo.get_sales_order_count(@start_date DATETIME, @end_date DATETIME)
 RETURNS TABLE AS

@@ -29,17 +29,17 @@ RETURN
 SELECT employees_attendance.employee_id,
 		attendance_types.id AS attendance_id,
 		count(employees_attendance.attendance_type) AS attendance_count,
+		employees_info.enrollement_status,
 		employees_info.name AS employee_name,
 		attendance_types.attendance_type
 FROM erp_system.dbo.employees_attendance
 INNER JOIN erp_system.dbo.employees_info
 ON employees_attendance.employee_id = employees_info.employee_id
-INNER JOIN erp_system.dbo.attendance_types
+RIGHT JOIN erp_system.dbo.attendance_types
 ON employees_attendance.attendance_type = attendance_types.id
 WHERE employees_attendance.calendar_date >= @start_date
 AND employees_attendance.calendar_date <= @end_date
-AND employees_info.enrollement_status <= 4
-GROUP BY employees_attendance.employee_id, employees_info.name, attendance_types.id, attendance_types.attendance_type
+GROUP BY employees_attendance.employee_id, employees_info.name, attendance_types.id, attendance_types.attendance_type, employees_info.enrollement_status
 
 
 --ABSENCE SUMMARY
@@ -47,55 +47,76 @@ CREATE FUNCTION dbo.absence_summary(@start_date DATETIME, @end_date DATETIME)
 RETURNS TABLE AS
 RETURN
 
-WITH get_first_degree_latency AS ( SELECT attendance_summary.employee_id,
+WITH get_first_degree_latency as ( SELECT attendance_summary.employee_id,
 									attendance_summary.attendance_count
-									FROM erp_system.dbo.attendance_summary('08-01-2021','08-31-2021')
+									FROM erp_system.dbo.attendance_summary(@start_date,@end_date)
 									WHERE attendance_summary.attendance_id = 1),
 
-	get_second_degree_latency AS ( SELECT attendance_summary.employee_id,
+	get_second_degree_latency as ( SELECT attendance_summary.employee_id,
 									attendance_summary.attendance_count
-									FROM erp_system.dbo.attendance_summary('08-01-2021','08-31-2021')
+									FROM erp_system.dbo.attendance_summary(@start_date,@end_date)
 									WHERE attendance_summary.attendance_id = 2),
 
-	get_third_degree_latency AS ( SELECT attendance_summary.employee_id,
+	get_third_degree_latency as ( SELECT attendance_summary.employee_id,
 										attendance_summary.attendance_count
-									FROM erp_system.dbo.attendance_summary('08-01-2021','08-31-2021')
+									FROM erp_system.dbo.attendance_summary(@start_date,@end_date)
 									WHERE attendance_summary.attendance_id = 3),
 
-	get_early_leave AS ( SELECT attendance_summary.employee_id,
+	get_early_leave as ( SELECT attendance_summary.employee_id,
 								attendance_summary.attendance_count
-						FROM erp_system.dbo.attendance_summary('08-01-2021','08-31-2021')
+						FROM erp_system.dbo.attendance_summary(@start_date,@end_date)
 						WHERE attendance_summary.attendance_id = 4),
 
-	get_absence AS ( SELECT attendance_summary.employee_id,
-							attendance_summary.attendance_count
-					FROM erp_system.dbo.attendance_summary('08-01-2021','08-31-2021')
-					WHERE attendance_summary.attendance_id = 5)
+	get_absence as (  SELECT attendance_summary.employee_id,
+								attendance_summary.attendance_count
+						FROM erp_system.dbo.attendance_summary(@start_date,@end_date)
+						WHERE attendance_summary.attendance_id = 5),
 
+	get_attended_days as (  SELECT attendance_summary.employee_id,
+								SUM(attendance_summary.attendance_count) as attended_days
+							FROM erp_system.dbo.attendance_summary(@start_date,@end_date)
+						
+							WHERE attendance_summary.attendance_id != 5
+							AND attendance_summary.attendance_id != 6
+							AND attendance_summary.attendance_id != 7
+							
+							GROUP BY attendance_summary.employee_id)
+
+	
 SELECT DISTINCT attendance_summary.employee_id,
 		CASE WHEN get_first_degree_latency.attendance_count > 0 THEN get_first_degree_latency.attendance_count
 		ELSE 0 END AS first_degree_count,
-		CASE WHEN get_secONd_degree_latency.attendance_count > 0 THEN get_secONd_degree_latency.attendance_count
-		ELSE 0 END AS secONd_degree_count,
+		CASE WHEN get_second_degree_latency.attendance_count > 0 THEN get_second_degree_latency.attendance_count
+		ELSE 0 END AS second_degree_count,
 		CASE WHEN get_third_degree_latency.attendance_count > 0 THEN get_third_degree_latency.attendance_count
 		ELSE 0 END AS third_degree_count,
 		CASE WHEN get_early_leave.attendance_count > 0 THEN get_early_leave.attendance_count
 		ELSE 0 END AS early_leave_count,
-		CASE WHEN get_absence.attendance_count > 0 THEN get_absence.attendance_count
+		CASE 
+		WHEN get_absence.attendance_count > 0 AND employees_contracts.contract_type != 2
+		THEN get_absence.attendance_count
+		WHEN get_absence.attendance_count > 0 AND employees_contracts.contract_type = 2 AND get_attended_days.attended_days > employees_contracts.part_time_days
+		THEN 0
+		WHEN get_absence.attendance_count > 0 AND employees_contracts.contract_type = 2 AND get_attended_days.attended_days < employees_contracts.part_time_days
+		THEN employees_contracts.part_time_days - get_attended_days.attended_days
 		ELSE 0 END AS absence_count
 
-FROM erp_system.dbo.attendance_summary('08-01-2021','08-31-2021')
+FROM erp_system.dbo.attendance_summary(@start_date,@end_date)
 
 LEFT JOIN get_first_degree_latency
 ON attendance_summary.employee_id = get_first_degree_latency.employee_id
-LEFT JOIN get_secONd_degree_latency
-ON attendance_summary.employee_id = get_secONd_degree_latency.employee_id
+LEFT JOIN get_second_degree_latency
+ON attendance_summary.employee_id = get_second_degree_latency.employee_id
 LEFT JOIN get_third_degree_latency
 ON attendance_summary.employee_id = get_third_degree_latency.employee_id
 LEFT JOIN get_early_leave
 ON attendance_summary.employee_id = get_early_leave.employee_id
 LEFT JOIN get_absence
 ON attendance_summary.employee_id = get_absence.employee_id
+LEFT JOIN get_attended_days
+ON attendance_summary.employee_id = get_attended_days.employee_id
+INNER JOIN erp_system.dbo.employees_contracts
+on attendance_summary.employee_id = employees_contracts.employee_id
 
 --TERMINATED EMPLOYEE WORKING DAYS
 CREATE FUNCTION dbo.get_terminated_employees_work_days(@start_date DATETIME, @end_date DATETIME)
@@ -184,18 +205,16 @@ employees_termination_info.resignation_date >= @start_date)
 CREATE FUNCTION dbo.generate_salaries(@start_date DATETIME, @end_date DATETIME)
 RETURNS TABLE AS
 RETURN
-WITH
-
-get_employee_penalties AS (select penalties_requests.employee_on_penalty,
-                                 sum(penalties_requests.penalty_days) AS penalty_days
+WITH get_employee_penalties AS (SELECT penalties_requests.employee_on_penalty,
+                                 SUM(penalties_requests.penalty_days) AS penalty_days
 							FROM erp_system.dbo.penalties_requests
 							WHERE penalties_requests.penalty_year = DATEPART(YEAR,@start_date)
 							AND penalties_requests.penalty_month = DATEPART(MONTH,@start_date)
 							AND penalties_requests.penalty_status = 4
 							GROUP BY penalties_requests.employee_on_penalty),
 
-get_employee_rewards AS (select rewards_requests.employee_on_reward,
-                                   		sum(rewards_requests.reward_days) AS reward_days
+get_employee_rewards AS (SELECT rewards_requests.employee_on_reward,
+                                   		SUM(rewards_requests.reward_days) AS reward_days
                           FROM erp_system.dbo.rewards_requests
 						  WHERE rewards_requests.reward_year = DATEPART(YEAR,@start_date)
 						  AND rewards_requests.reward_month = DATEPART(MONTH,@start_date)
@@ -224,7 +243,7 @@ get_allowances AS (SELECT allowances_requests.employee_id,
 					AND allowances_requests.allowance_status = 4
 					GROUP BY allowances_requests.employee_id)					
 
-SELECT employees_info.employee_id,
+SELECT DISTINCT employees_info.employee_id,
 		employees_payroll_info.branch_code,
 		employees_payroll_info.bank_payroll_id,
 		
@@ -233,9 +252,21 @@ SELECT employees_info.employee_id,
        employee_salary_due.gross_salary,
        employee_salary_due.insurance_and_taxes,
        attendance_deductions.deducted_amount AS attendance_ded_value,
-       (get_employee_penalties.penalty_days * employee_salary_due.net_salary) / 30 AS penalty_value,
-       (get_employee_rewards.reward_days * employee_salary_due.net_salary) / 30 AS reward_value,
-					
+	   
+	   CASE 
+	   WHEN employees_contracts.contract_type = 2
+		THEN (get_employee_penalties.penalty_days * employee_salary_due.net_salary) / employees_contracts.part_time_days
+		ELSE (get_employee_penalties.penalty_days * employee_salary_due.net_salary) / 30
+		END  AS penalty_value,
+
+		  CASE 
+	   WHEN employees_contracts.contract_type = 2 AND get_employee_rewards.reward_days IS NOT NULL
+		THEN ((get_employee_rewards.reward_days + get_part_time_extra_days.extra_days) * employee_salary_due.net_salary) / employees_contracts.part_time_days 
+	   WHEN  employees_contracts.contract_type = 2 
+	   THEN (get_part_time_extra_days.extra_days * employee_salary_due.net_salary) / employees_contracts.part_time_days 
+		ELSE (get_employee_rewards.reward_days * employee_salary_due.net_salary) / 30
+		END  AS reward_value,
+       		
 		get_allowances.allowance_value,
 		get_deductions.deduction_value,
 		
@@ -247,6 +278,10 @@ LEFT JOIN erp_system.dbo.attendance_deductions(@start_date,@end_date)
 ON employees_info.employee_id = attendance_deductions.employee_id
 INNER JOIN erp_system.dbo.employee_salary_due(@start_date,@end_date)
 ON employees_info.employee_id = employee_salary_due.employee_id
+INNER JOIN erp_system.dbo.employees_contracts
+ON employees_info.employee_id = employees_contracts.employee_id
+LEFT JOIN erp_system.dbo.get_part_time_extra_days(@start_date,@end_date)
+ON employees_info.employee_id = get_part_time_extra_days.employee_id
 LEFT JOIN get_employee_penalties
 ON employees_info.employee_id = get_employee_penalties.employee_ON_penalty
 LEFT JOIN get_employee_rewards
@@ -261,7 +296,6 @@ LEFT JOIN erp_system.dbo.employees_payroll_info
 ON employees_info.employee_id = employees_payroll_info.employee_id
 WHERE employees_payroll_info.is_preferred = 1
 AND get_salary_hold.employee_id IS NULL
-
 --ATTENDANCE DEDUCTIONS
 CREATE FUNCTION dbo.attendance_deductions(@start_date DATETIME, @end_date DATETIME)
 RETURNS TABLE AS
@@ -276,6 +310,15 @@ SELECT  absence_summary.employee_id,
 		WHEN 
 			absence_summary.employee_id = employees_excluded_attendance.employee_id 
 			AND employees_excluded_attendance.is_excluded = 1 THEN 0
+		WHEN employees_contracts.contract_type = 2
+		THEN
+		(employee_salary_due.net_salary / employees_contracts.part_time_days) * absence_summary.absence_count + 
+				((employee_salary_due.net_salary / employees_contracts.part_time_days) / 8) * 
+				(absence_summary.third_degree_count + 
+				absence_summary.second_degree_count * 2 + 
+				absence_summary.first_degree_count * 4 + 
+				absence_summary.early_leave_count * 4)	
+
 		ELSE
 		(employee_salary_due.net_salary / 30) * absence_summary.absence_count + 
 				((employee_salary_due.net_salary / 30) / 8) * 
@@ -292,6 +335,28 @@ ON absence_summary.employee_id = employee_salary_due.employee_id
 INNER JOIN erp_system.dbo.employees_excluded_attendance
 ON absence_summary.employee_id = employees_excluded_attendance.employee_id
 
+INNER JOIN erp_system.dbo.employees_contracts
+ON absence_summary.employee_id = employees_contracts.employee_id
+
+--PART-TIME EXTRA DAYS
+CREATE FUNCTION dbo.get_part_time_extra_days(@start_date DATETIME, @end_date DATETIME)
+RETURNS TABLE AS
+RETURN
+WITH get_attended_days AS (SELECT attendance_summary.employee_id,
+								SUM(attendance_summary.attendance_count) as attended_days
+							FROM erp_system.dbo.attendance_summary(@start_date, @end_date)
+							INNER JOIN erp_system.dbo.employees_contracts
+							on attendance_summary.employee_id = employees_contracts.employee_id
+							WHERE attendance_summary.attendance_id != 5
+							AND attendance_summary.attendance_id != 6
+							AND attendance_summary.attendance_id != 7
+							AND employees_contracts.contract_type = 2
+							GROUP BY attendance_summary.employee_id)
+SELECT get_attended_days.employee_id,
+		get_attended_days.attended_days - employees_contracts.part_time_days AS extra_days
+FROM get_attended_days
+INNER JOIN erp_system.dbo.employees_contracts
+on get_attended_days.employee_id = employees_contracts.employee_id
 
 --EMPLOYEE REGULAR VACATIONS DAYS COUNT
 CREATE FUNCTION dbo.get_regular_vacations_amount(@start_date DATETIME, @end_date DATETIME)

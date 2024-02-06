@@ -4,14 +4,15 @@ CREATE TABLE erp_system.dbo.time_units						(	id INT PRIMARY KEY,
 														date_added DATETIME DEFAULT getdate()
 													);			
 													
-CREATE TABLE erp_system.dbo.client_generic_work_fields		( 	id INT PRIMARY KEY,
-																generic_work_field VARCHAR(50),
+
+CREATE TABLE erp_system.dbo.client_sectors		( 	sector_id INT PRIMARY KEY,
+																sector_name VARCHAR (50),
 																date_added DATETIME DEFAULT getdate()
 															);
 
-CREATE TABLE erp_system.dbo.client_specific_work_fields		( 	generic_field_name INT REFERENCES client_generic_work_fields(id),
-																id INT PRIMARY KEY,
-																specific_work_field VARCHAR (50),
+
+CREATE TABLE erp_system.dbo.client_types		( 	type_id INT PRIMARY KEY,
+																client_type VARCHAR (50),
 																date_added DATETIME DEFAULT getdate()
 															);
 
@@ -197,6 +198,24 @@ CREATE TABLE erp_system.dbo.missions_types		(	id INT PRIMARY KEY,
 													date_added DATETIME DEFAULT getdate()
 												);
 
+CREATE TABLE erp_system.dbo.service_types		(	id INT PRIMARY KEY,
+													service_type VARCHAR(50),
+													date_added DATETIME DEFAULT getdate()
+												);
+
+
+CREATE TABLE erp_system.dbo.order_allowed_services		(	contract_type INT REFERENCES contracts_type(id),
+															service_type INT REFERENCES service_types(id),
+															date_added DATETIME DEFAULT GETDATE(),
+															PRIMARY KEY (contract_type, service_type)
+														);
+
+
+CREATE TABLE erp_system.dbo.maintenance_contracts_allowed_services	(	service_type INT REFERENCES service_types(id),
+																		date_added DATETIME DEFAULT GETDATE(),
+																		PRIMARY KEY (service_type)
+																	);
+														
 CREATE TABLE erp_system.dbo.missions_allowed_types		(	team_id INT REFERENCES teams_type(id),
 															mission_type INT REFERENCES missions_types(id),
 															date_added DATETIME DEFAULT getdate(),
@@ -493,6 +512,7 @@ CREATE TABLE erp_system.dbo.employees_contracts		(	employee_id INT REFERENCES em
 														probation_period INT,
 														probation_period_unit INT REFERENCES time_units(id),
 														date_added DATETIME DEFAULT getdate(),
+														part_time_days INT,
 														PRIMARY KEY (employee_id, contract_serial)
 													);
 													 
